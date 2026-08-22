@@ -1,7 +1,9 @@
 import { CHANNEL_NAME, MILK_TYPES, createState, processEvent } from './engine.js';
+import { bindOverlayUI, handleMilkEvent, updateLeaderboard, updateMeter } from './ui.js';
 
 const channel = new BroadcastChannel(CHANNEL_NAME);
 const state = createState();
+const previewUi = bindOverlayUI('preview-');
 
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
@@ -27,13 +29,26 @@ const SIM_MAP = {
   fountain: () => ({ type: 'like', user: 'CROWD', likeCount: 500 }),
 };
 
+function snapshotState() {
+  return {
+    ...state,
+    leaderboard: [...state.leaderboard],
+    unlockedMilks: [...state.unlockedMilks],
+  };
+}
+
 function broadcast(type, payload) {
   channel.postMessage({ type, ...payload });
 }
 
+function showOnPreview(result) {
+  handleMilkEvent(previewUi, result, state);
+}
+
 function applyEvent(event) {
   const result = processEvent(event, state);
-  broadcast('milk-event', { event: result, state: { ...state, leaderboard: [...state.leaderboard], unlockedMilks: [...state.unlockedMilks] } });
+  showOnPreview(result);
+  broadcast('milk-event', { event: result, state: snapshotState() });
   renderMilks();
   if (result.isNewUnlock) flashUnlock(result);
   return result;
@@ -62,6 +77,10 @@ document.querySelectorAll('[data-sim]').forEach((btn) => {
 });
 
 statusDot.style.background = '#4ade80';
-statusText.textContent = 'Demo aktiv — öffne Overlay in zweitem Tab';
+statusText.textContent = 'Live-Vorschau aktiv — einfach Buttons drücken';
 renderMilks();
-broadcast('sync', { state: { ...state, leaderboard: [...state.leaderboard] } });
+updateMeter(previewUi, 0);
+updateLeaderboard(previewUi, []);
+broadcast('sync', { state: snapshotState() });
+
+setTimeout(() => applyEvent(SIM_MAP['gift-small']()), 900);

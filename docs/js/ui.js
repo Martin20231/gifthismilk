@@ -1,16 +1,17 @@
-export function bindOverlayUI() {
+export function bindOverlayUI(prefix = '') {
+  const id = (name) => document.getElementById(`${prefix}${name}`);
   return {
-    machine: document.getElementById('machine'),
-    stream: document.getElementById('stream'),
-    bottle: document.getElementById('bottle'),
-    bottleEmoji: document.getElementById('bottle-emoji'),
-    fountain: document.getElementById('fountain'),
-    particles: document.getElementById('particles'),
-    meterFill: document.getElementById('meter-fill'),
-    toast: document.getElementById('toast'),
-    toastText: document.getElementById('toast-text'),
-    gifTag: document.getElementById('gif-tag'),
-    leaderboardEl: document.getElementById('leaderboard'),
+    machine: id('machine'),
+    stream: id('stream'),
+    bottle: id('bottle'),
+    bottleEmoji: id('bottle-emoji'),
+    fountain: id('fountain'),
+    particles: id('particles'),
+    meterFill: id('meter-fill'),
+    toast: id('toast'),
+    toastText: id('toast-text'),
+    gifTag: id('gif-tag'),
+    leaderboardEl: id('leaderboard'),
   };
 }
 

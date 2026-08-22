@@ -433,3 +433,34 @@ body.overlay-mode {
 .milk-chip.locked {
   opacity: 0.35;
 }
+
+.preview-section {
+  margin-bottom: 32px;
+}
+
+.preview-frame {
+  display: flex;
+  justify-content: center;
+  padding: 20px 12px;
+  background: radial-gradient(circle at 50% 0%, rgba(255, 107, 157, 0.12), transparent 60%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
+  border: 1px solid rgba(255, 107, 157, 0.2);
+  border-radius: 20px;
+}
+
+.preview-overlay {
+  width: 100%;
+  max-width: 420px;
+  padding: 0;
+}
+
+.preview-overlay .overlay-card {
+  margin: 0 auto;
+}
+
+.preview-hint {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
