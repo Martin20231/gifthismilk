@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gif This Milk — Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <main class="demo-page">
+    <p><span class="status-dot" id="status-dot"></span><span id="status-text">Lädt…</span></p>
+    <h1>Gif This Milk</h1>
+    <p class="tagline">gif this milk</p>
+
+    <section class="demo-section">
+      <h2>Simuliere TikTok Events</h2>
+      <div class="btn-grid">
+        <button class="btn" data-sim="chat">💬 !milch im Chat</button>
+        <button class="btn" data-sim="like">❤️ Like-Burst</button>
+        <button class="btn" data-sim="gift-small">🌹 Rose (Gift)</button>
+        <button class="btn" data-sim="gift-medium">🎁 Medium Gift</button>
+        <button class="btn" data-sim="gift-large">💎 Big Gift</button>
+        <button class="btn" data-sim="follow">➕ Follow</button>
+        <button class="btn btn-primary" data-sim="fountain">🌊 Fontäne (100%)</button>
+      </div>
+    </section>
+
+    <section class="demo-section">
+      <h2>Freigeschaltete Milch-Sorten</h2>
+      <div class="milk-collection" id="milk-collection"></div>
+    </section>
+
+    <section class="demo-section link-box">
+      <strong>Live-Overlay (zweiter Tab oder OBS Browser Source):</strong>
+      <code id="overlay-url"></code>
+      <p style="margin-top:12px;color:var(--muted);font-size:0.8rem;">
+        Demo + Overlay synchronisieren sich im Browser. Für TikTok Live: <code>npm start</code> lokal.
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="js/demo.js"></script>
+</body>
+</html>

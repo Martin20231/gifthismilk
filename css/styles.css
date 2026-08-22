@@ -1,0 +1,435 @@
+:root {
+  --milk: #f5f0e8;
+  --milk-dark: #e8dfd0;
+  --accent: #ff6b9d;
+  --accent-glow: #ff8fb3;
+  --bg: #0a0a12;
+  --glass: rgba(255, 255, 255, 0.06);
+  --text: #fff;
+  --muted: rgba(255, 255, 255, 0.55);
+  --font-display: 'Syne', system-ui, sans-serif;
+  --font-body: 'DM Sans', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* ── Overlay (transparent for OBS) ── */
+body.overlay-mode {
+  background: transparent;
+  overflow: hidden;
+}
+
+.overlay-wrap {
+  width: 420px;
+  padding: 16px;
+  font-family: var(--font-body);
+}
+
+.overlay-card {
+  background: linear-gradient(145deg, rgba(20, 18, 35, 0.92), rgba(10, 10, 18, 0.88));
+  border: 1px solid rgba(255, 107, 157, 0.25);
+  border-radius: 20px;
+  padding: 20px;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 60px rgba(255, 107, 157, 0.08);
+}
+
+.overlay-header {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.overlay-header h1 {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  background: linear-gradient(90deg, var(--milk), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.overlay-header .slogan {
+  font-size: 0.75rem;
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: lowercase;
+  margin-top: 4px;
+}
+
+/* Milk machine */
+.milk-machine {
+  position: relative;
+  height: 180px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.machine-body {
+  width: 140px;
+  height: 120px;
+  background: linear-gradient(180deg, #3a3a4a 0%, #2a2a38 100%);
+  border-radius: 12px 12px 8px 8px;
+  position: relative;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.15s ease;
+}
+
+.machine-body.shake {
+  animation: shake 0.4s ease;
+}
+
+.machine-body.explode {
+  animation: explode 0.6s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px) rotate(-1deg); }
+  40% { transform: translateX(4px) rotate(1deg); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
+}
+
+@keyframes explode {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+
+.machine-nozzle {
+  width: 24px;
+  height: 20px;
+  background: #555;
+  border-radius: 0 0 6px 6px;
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.milk-stream {
+  position: absolute;
+  bottom: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 8px;
+  height: 0;
+  background: linear-gradient(180deg, var(--milk), var(--milk-dark));
+  border-radius: 0 0 4px 4px;
+  opacity: 0;
+  transition: height 0.3s ease, opacity 0.2s;
+}
+
+.milk-stream.active {
+  height: 50px;
+  opacity: 1;
+  animation: pour 0.8s ease infinite;
+}
+
+@keyframes pour {
+  0%, 100% { transform: translateX(-50%) scaleY(1); }
+  50% { transform: translateX(-50%) scaleY(1.05); }
+}
+
+.milk-bottle {
+  position: absolute;
+  bottom: 0;
+  width: 36px;
+  height: 56px;
+  background: linear-gradient(180deg, transparent 30%, var(--milk) 30%);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px 4px 8px 8px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.milk-bottle.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.milk-bottle .emoji {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.4rem;
+}
+
+.milk-fountain {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 80px;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.milk-fountain.active {
+  opacity: 1;
+  animation: fountain 1.2s ease-out;
+}
+
+@keyframes fountain {
+  0% { transform: translateX(-50%) scale(0); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translateX(-50%) scale(1.5); opacity: 0; }
+}
+
+.milk-fountain::before,
+.milk-fountain::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--milk) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--milk);
+  border-radius: 50%;
+  animation: particle-fly 0.8s ease-out forwards;
+}
+
+@keyframes particle-fly {
+  to {
+    transform: translate(var(--tx), var(--ty));
+    opacity: 0;
+  }
+}
+
+/* Progress bar */
+.milk-meter {
+  margin-bottom: 12px;
+}
+
+.milk-meter label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 6px;
+}
+
+.meter-track {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.meter-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-glow));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
+/* Event toast */
+.event-toast {
+  min-height: 48px;
+  padding: 10px 14px;
+  background: var(--glass);
+  border-radius: 12px;
+  border-left: 3px solid var(--accent);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: all 0.35s ease;
+}
+
+.event-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.event-toast .gif-tag {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 8px;
+  background: rgba(255, 107, 157, 0.2);
+  border-radius: 6px;
+  font-size: 0.7rem;
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* Leaderboard mini */
+.leaderboard-mini {
+  margin-top: 12px;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.leaderboard-mini ol {
+  list-style: none;
+  margin-top: 4px;
+}
+
+.leaderboard-mini li {
+  padding: 2px 0;
+}
+
+.leaderboard-mini li:first-child {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Demo panel ── */
+.demo-page {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+.demo-page h1 {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.demo-page .tagline {
+  color: var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: lowercase;
+  margin-bottom: 32px;
+}
+
+.demo-section {
+  margin-bottom: 28px;
+}
+
+.demo-section h2 {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.btn-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.btn {
+  padding: 14px 18px;
+  border: 1px solid rgba(255, 107, 157, 0.3);
+  border-radius: 12px;
+  background: rgba(255, 107, 157, 0.08);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn:hover {
+  background: rgba(255, 107, 157, 0.2);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #c44dff);
+  border-color: transparent;
+}
+
+.link-box {
+  margin-top: 32px;
+  padding: 16px;
+  background: var(--glass);
+  border-radius: 12px;
+  font-size: 0.85rem;
+}
+
+.link-box code {
+  display: block;
+  margin-top: 8px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  word-break: break-all;
+  color: var(--accent-glow);
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #4ade80;
+  margin-right: 6px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.milk-collection {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.milk-chip {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.milk-chip.unlocked {
+  border-color: var(--accent);
+  background: rgba(255, 107, 157, 0.12);
+}
+
+.milk-chip.locked {
+  opacity: 0.35;
+}
