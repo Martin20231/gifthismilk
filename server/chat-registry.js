@@ -41,6 +41,8 @@ function getPending(user) {
 function fieldLabel(field) {
   return { country: 'land', gender: 'geschlecht', sexuality: 'sexualität' }[field] || field;
 }
+
+function missingFields(sel) {
   const missing = [];
   if (!sel.country) missing.push('land');
   if (!sel.gender) missing.push('geschlecht');
