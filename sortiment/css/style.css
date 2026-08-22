@@ -528,9 +528,9 @@ body {
   gap: 5px;
   padding: 5px 12px;
   border-radius: 999px;
-  background: rgba(0, 229, 190, 0.1);
-  border: 1px solid rgba(0, 229, 190, 0.28);
-  color: var(--accent);
+  background: rgba(0, 229, 190, 0.18);
+  border: 1px solid rgba(0, 229, 190, 0.4);
+  color: var(--text-accent);
   font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.12em;
@@ -573,11 +573,11 @@ body {
 .stream-info span {
   padding: 6px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
   border: 1px solid var(--border);
   font-size: 0.68rem;
   font-weight: 500;
-  color: var(--muted);
+  color: var(--text);
 }
 
 .machine-mini {
@@ -591,11 +591,11 @@ body {
 .machine-mini-body {
   width: 96px;
   height: 88px;
-  background: linear-gradient(180deg, #6366f1 0%, #1e1b4b 14%, #0a0a12);
-  border: 2px solid rgba(99, 102, 241, 0.25);
+  background: linear-gradient(180deg, #818cf8 0%, #4338ca 18%, #2a2a48);
+  border: 2px solid rgba(129, 140, 248, 0.4);
   border-radius: 18px;
   position: relative;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(99, 102, 241, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 0 24px rgba(99, 102, 241, 0.15);
 }
 
 .machine-mini-tank {
