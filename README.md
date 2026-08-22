@@ -52,7 +52,9 @@ Optional: `npm install @tiktool/live`
 
 | Aktion | Reaktion |
 |--------|----------|
-| Chat `!milch` / `!gif` | Milch wird gepresst |
+| **Like** | Glas füllt sich für alle (Sortiment) |
+| Chat **`trinken`** | Glas leeren wenn voll (Sortiment) |
+| Chat `!milch` / `!gif` | Milch wird gepresst (Overlay) |
 | Like-Burst | Milch-Level steigt → Fontäne bei 100% |
 | Rose (Gift) | Traurige Milch freischalten |
 | Größeres Gift | Existenzielle / Chaos-Milch |
