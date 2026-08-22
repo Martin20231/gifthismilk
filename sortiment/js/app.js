@@ -11,6 +11,17 @@ import {
 
 const app = document.getElementById('app');
 
+const SEXUALITY_EMOJI = {
+  Heterosexuell: '💑',
+  Schwul: '🏳️‍🌈',
+  Lesbisch: '🌸',
+  Bisexuell: '💜',
+  Pansexuell: '🦋',
+  Asexuell: '🤍',
+  Demisexuell: '🔗',
+  Queer: '✨',
+};
+
 const selection = {
   country: null,
   gender: null,
@@ -35,159 +46,179 @@ function getProfile() {
   return resolveMilkProfile(selection.country, selection.gender, selection.sexuality);
 }
 
+function stepIndex() {
+  if (selection.sexuality) return 3;
+  if (selection.gender) return 2;
+  if (selection.country) return 1;
+  return 0;
+}
+
+function renderSteps() {
+  const steps = ['Land', 'Geschmack', 'Aroma'];
+  const current = stepIndex();
+  return steps.map((label, i) => {
+    const n = i + 1;
+    const state = current > n ? 'done' : current === n ? 'active' : '';
+    return `<div class="step-item ${state}"><span class="step-dot">${current > n ? '✓' : n}</span><span>${label}</span></div>`;
+  }).join('');
+}
+
 function render() {
   const profile = getProfile();
   const country = selection.country ? getCountry(selection.country) : null;
-  const step = selection.sexuality ? 3 : selection.gender ? 2 : selection.country ? 1 : 0;
 
   app.innerHTML = `
-    <div class="page ${gameActive ? 'game-active' : ''}">
-      <header class="top-bar">
-        <div class="logo">
-          <span class="logo-icon">🥛</span>
-          GTM
-        </div>
-        <div class="progress-pills" aria-label="Fortschritt">
-          <span class="progress-pill ${step >= 1 ? 'done' : step === 0 ? 'active' : ''}"></span>
-          <span class="progress-pill ${step >= 2 ? 'done' : step === 1 ? 'active' : ''}"></span>
-          <span class="progress-pill ${step >= 3 ? 'done' : step === 2 ? 'active' : ''}"></span>
-        </div>
-      </header>
+    <div class="shell ${gameActive ? 'is-game' : ''}">
 
-      <section class="setup" id="setup">
-        <header class="hero">
-          <div class="hero-badge">Live Experience</div>
-          <h1>Stell deine <span class="gradient-text">Milch</span> zusammen</h1>
-          <p class="lead">Land · Geschlecht · Aroma — dann ins Live-Spiel.</p>
+      <section class="screen setup" id="setup">
+        <header class="brand">
+          <div class="brand-icon">🥛</div>
+          <div class="brand-text">
+            <strong>gif this milk</strong>
+            <span>Live Milch Builder</span>
+          </div>
         </header>
 
-        <div class="selector-card ${selection.country ? 'active' : ''}" id="step-land">
-          <div class="step-header">
-            <span class="step-num">01</span>
-            <div>
-              <h2>🌍 Land</h2>
-              <p class="step-desc">Bestimmt deine Sorte</p>
-            </div>
-          </div>
-          <div class="chip-grid countries" id="countries">
-            ${COUNTRIES.map((c) => `
-              <button type="button" class="chip ${selection.country === c.code ? 'selected' : ''}" data-country="${c.code}">
-                <span class="chip-flag">${c.flag}</span> ${esc(c.name)}
-              </button>
-            `).join('')}
-          </div>
+        <div class="hero">
+          <div class="hero-pill">🔴 TikTok Live Style</div>
+          <h1>Mix deine<br><em>Milch</em></h1>
+          <p class="hero-sub">Land · Geschlecht · Aroma — dann live ins Glas.</p>
+          <div class="step-track">${renderSteps()}</div>
         </div>
 
-        <div class="selector-card ${selection.country ? (selection.gender ? 'active' : '') : 'disabled'}">
-          <div class="step-header">
-            <span class="step-num">02</span>
-            <div>
-              <h2>⚧️ Geschlecht</h2>
-              <p class="step-desc">Bestimmt deinen Geschmack</p>
-            </div>
-          </div>
-          <div class="chip-grid genders" id="genders">
-            ${GENDER_OPTIONS.map((g) => `
-              <button type="button" class="chip ${selection.gender === g.id ? 'selected' : ''}" data-gender="${g.id}" ${selection.country ? '' : 'disabled'}>
-                ${g.icon} ${esc(g.label)}
-              </button>
-            `).join('')}
-          </div>
-        </div>
+        <div class="bento">
 
-        <div class="selector-card ${selection.gender ? (selection.sexuality ? 'active' : '') : 'disabled'}">
-          <div class="step-header">
-            <span class="step-num">03</span>
-            <div>
-              <h2>🌈 Sexualität</h2>
-              <p class="step-desc">Bestimmt dein Aroma</p>
+          <article class="bento-card card-land ${selection.country ? 'has-value' : ''}">
+            <div class="card-head">
+              <span class="card-num">01</span>
+              <div>
+                <h2>Land</h2>
+                <p>= deine Sorte</p>
+              </div>
             </div>
-          </div>
-          <div class="aroma-grid" id="sexualities">
-            ${selection.gender ? getSexualityOptions().map((o) => `
-              <button type="button" class="aroma-card ${selection.sexuality === o.label ? 'selected' : ''}" data-sexuality="${esc(o.label)}">
-                <strong>${esc(o.label)}</strong>
-                <span>${esc(o.aroma)}</span>
-              </button>
-            `).join('') : '<p class="empty-msg">Zuerst Land und Geschlecht wählen.</p>'}
-          </div>
+            <div class="flag-grid" id="countries">
+              ${COUNTRIES.map((c) => `
+                <button type="button" class="flag-tile ${selection.country === c.code ? 'selected' : ''}" data-country="${c.code}">
+                  <span class="flag-big">${c.flag}</span>
+                  <span class="flag-name">${esc(c.name)}</span>
+                </button>
+              `).join('')}
+            </div>
+          </article>
+
+          <article class="bento-card card-gender ${!selection.country ? 'locked' : selection.gender ? 'has-value' : ''}">
+            <div class="card-head">
+              <span class="card-num">02</span>
+              <div>
+                <h2>Geschlecht</h2>
+                <p>= dein Geschmack</p>
+              </div>
+            </div>
+            <div class="gender-row" id="genders">
+              ${GENDER_OPTIONS.map((g) => `
+                <button type="button" class="gender-tile ${selection.gender === g.id ? 'selected' : ''}" data-gender="${g.id}" ${selection.country ? '' : 'disabled'}>
+                  <span class="gender-emoji">${g.icon}</span>
+                  <span class="gender-label">${esc(g.label)}</span>
+                </button>
+              `).join('')}
+            </div>
+          </article>
+
+          <article class="bento-card card-aroma ${!selection.gender ? 'locked' : selection.sexuality ? 'has-value' : ''}">
+            <div class="card-head">
+              <span class="card-num">03</span>
+              <div>
+                <h2>Sexualität</h2>
+                <p>= dein Aroma</p>
+              </div>
+            </div>
+            <div class="aroma-grid" id="sexualities">
+              ${selection.gender ? getSexualityOptions().map((o) => `
+                <button type="button" class="aroma-tile ${selection.sexuality === o.label ? 'selected' : ''}" data-sexuality="${esc(o.label)}">
+                  <span class="aroma-emoji">${SEXUALITY_EMOJI[o.label] ?? '🌈'}</span>
+                  <span class="aroma-name">${esc(o.label)}</span>
+                  <span class="aroma-flavor">${esc(o.aroma)}</span>
+                </button>
+              `).join('') : '<p class="lock-msg">🔒 Erst Land & Geschlecht wählen</p>'}
+            </div>
+          </article>
+
         </div>
 
         ${profile && country ? `
-          <div class="preview-box">
-            <p class="preview-label">Deine Milch</p>
-            <div class="preview-sorte">
-              <span>${country.flag}</span>
-              <span>${esc(country.sorte)}</span>
-            </div>
-            <div class="preview-tags">
-              <span class="preview-tag">⚧️ ${esc(profile.taste)}</span>
-              <span class="preview-tag">🌈 ${esc(profile.aroma)}</span>
+          <div class="milk-card">
+            <div class="milk-card-glow"></div>
+            <div class="milk-card-inner">
+              <span class="milk-card-label">Dein Mix ist ready 🎉</span>
+              <div class="milk-card-title">${country.flag} ${esc(country.sorte)}</div>
+              <div class="milk-card-tags">
+                <span>⚧️ ${esc(profile.taste)}</span>
+                <span>🌈 ${esc(profile.aroma)}</span>
+              </div>
             </div>
           </div>
         ` : ''}
-      </section>
 
-      <div class="cta-bar">
-        <div class="cta-inner">
-          <button type="button" class="btn btn-start ${isReady() ? 'ready' : ''}" id="start-game" ${isReady() ? '' : 'disabled'}>
-            🎮 Spiel starten
+        <div class="fab-wrap">
+          <button type="button" class="fab-start ${isReady() ? 'ready' : ''}" id="start-game" ${isReady() ? '' : 'disabled'}>
+            <span class="fab-text">Spiel starten</span>
+            <span class="fab-arrow">→</span>
           </button>
         </div>
-      </div>
+      </section>
 
-      <section class="game" id="game">
-        <div class="game-stage">
-          <header class="stream-header">
-            <button type="button" class="back-setup" id="back-setup">← Zurück</button>
-            <span class="live-badge">LIVE</span>
-            <h1>Gif This Milk</h1>
-            <p class="stream-slogan">gif this milk</p>
+      <section class="screen game" id="game">
+        <div class="live-phone">
+          <div class="live-phone-notch"></div>
+
+          <header class="live-top">
+            <button type="button" class="live-back" id="back-setup">← Mix</button>
+            <div class="live-brand">gif this milk</div>
+            <span class="live-dot">LIVE</span>
           </header>
 
           ${profile && country ? `
-            <div class="stream-info">
+            <div class="live-tags">
               <span>${country.flag} ${esc(country.sorte)}</span>
               <span>⚧️ ${esc(profile.taste)}</span>
               <span>🌈 ${esc(profile.aroma)}</span>
             </div>
           ` : ''}
 
-          <div class="machine-mini">
-            <div class="machine-mini-body">
-              <div class="machine-mini-tank"></div>
-              <div class="machine-mini-nozzle"></div>
+          <div class="live-stage">
+            <div class="dispenser">
+              <div class="dispenser-body">
+                <div class="dispenser-window"></div>
+                <div class="dispenser-spout"></div>
+              </div>
+              <div class="pour ${streamState.pouring ? 'active' : ''}"></div>
             </div>
-            <div class="stream-pour ${streamState.pouring ? 'active' : ''}"></div>
+
+            <div class="glass-zone">
+              <div class="glass ${streamState.drinking ? 'drinking' : ''}">
+                <div class="glass-fill" style="height:${streamState.fill}%"></div>
+                <div class="glass-glare"></div>
+              </div>
+              <div class="fill-bar"><div class="fill-bar-inner" style="width:${streamState.fill}%"></div></div>
+              <p class="fill-text">${streamState.fill >= 100 ? '🥛 Voll — trinken!' : `${Math.round(streamState.fill)}% im Glas`}</p>
+            </div>
           </div>
 
-          <div class="glass-wrap">
-            <div class="glass ${streamState.drinking ? 'drinking' : ''}" id="glass">
-              <div class="glass-milk" style="height:${streamState.fill}%"></div>
-              <div class="glass-shine"></div>
-            </div>
-            <p class="glass-label">${streamState.fill >= 100 ? 'Voll — trinken!' : `${Math.round(streamState.fill)}% voll`}</p>
-            <div class="fill-ring" aria-hidden="true">
-              <div class="fill-ring-bar" style="width:${streamState.fill}%"></div>
-            </div>
-          </div>
+          <div class="live-toast ${streamState.toast ? 'show' : ''}">${esc(streamState.toast || '')}</div>
 
-          <div class="stream-toast ${streamState.toast ? 'show' : ''}">${esc(streamState.toast || '')}</div>
-
-          <div class="stream-actions">
-            <button type="button" class="like-btn" id="like-btn" ${streamState.fill >= 100 ? 'disabled' : ''}>
-              ❤️ Like <span>${streamState.likes}</span>
+          <div class="live-actions">
+            <button type="button" class="btn-like" id="like-btn" ${streamState.fill >= 100 ? 'disabled' : ''}>
+              ❤️ Like <b>${streamState.likes}</b>
             </button>
-            <button type="button" class="drink-btn ${streamState.fill >= 100 ? 'show' : ''}" id="drink-btn">
+            <button type="button" class="btn-drink ${streamState.fill >= 100 ? 'show' : ''}" id="drink-btn">
               🥤 Trinken
             </button>
           </div>
 
-          <p class="stream-hint">
-            ${streamState.fill >= 100 ? 'Glas voll — tippe Trinken!' : 'Like = Milch ins Glas. Bei 100% trinken.'}
-          </p>
+          <p class="live-hint">${streamState.fill >= 100 ? 'Glas voll — jetzt trinken!' : 'Jeder Like füllt dein Glas 🥛'}</p>
         </div>
       </section>
+
     </div>
   `;
 
@@ -226,7 +257,7 @@ function bindEvents() {
     streamState = getStreamState();
     gameActive = true;
     render();
-    document.getElementById('game')?.scrollIntoView({ behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 
   document.getElementById('back-setup')?.addEventListener('click', () => {
