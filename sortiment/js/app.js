@@ -38,31 +38,55 @@ function getProfile() {
 function render() {
   const profile = getProfile();
   const country = selection.country ? getCountry(selection.country) : null;
+  const step = selection.sexuality ? 3 : selection.gender ? 2 : selection.country ? 1 : 0;
 
   app.innerHTML = `
     <div class="page ${gameActive ? 'game-active' : ''}">
-      <!-- Setup: alles auf einer Seite -->
+      <header class="top-bar">
+        <div class="logo">
+          <span class="logo-icon">🥛</span>
+          GTM
+        </div>
+        <div class="progress-pills" aria-label="Fortschritt">
+          <span class="progress-pill ${step >= 1 ? 'done' : step === 0 ? 'active' : ''}"></span>
+          <span class="progress-pill ${step >= 2 ? 'done' : step === 1 ? 'active' : ''}"></span>
+          <span class="progress-pill ${step >= 3 ? 'done' : step === 2 ? 'active' : ''}"></span>
+        </div>
+      </header>
+
       <section class="setup" id="setup">
         <header class="hero">
-          <p class="eyebrow">Gif This Milk</p>
-          <h1>Stell deine Milch zusammen</h1>
-          <p class="lead">Land · Geschlecht · Aroma — dann Spiel starten.</p>
+          <div class="hero-badge">Live Experience</div>
+          <h1>Stell deine <span class="gradient-text">Milch</span> zusammen</h1>
+          <p class="lead">Land · Geschlecht · Aroma — dann ins Live-Spiel.</p>
         </header>
 
-        <div class="selector-block">
-          <h2>🌍 Land <span class="hint">= Sorte</span></h2>
-          <div class="chip-grid" id="countries">
+        <div class="selector-card ${selection.country ? 'active' : ''}" id="step-land">
+          <div class="step-header">
+            <span class="step-num">01</span>
+            <div>
+              <h2>🌍 Land</h2>
+              <p class="step-desc">Bestimmt deine Sorte</p>
+            </div>
+          </div>
+          <div class="chip-grid countries" id="countries">
             ${COUNTRIES.map((c) => `
               <button type="button" class="chip ${selection.country === c.code ? 'selected' : ''}" data-country="${c.code}">
-                ${c.flag} ${esc(c.name)}
+                <span class="chip-flag">${c.flag}</span> ${esc(c.name)}
               </button>
             `).join('')}
           </div>
         </div>
 
-        <div class="selector-block ${selection.country ? '' : 'disabled'}">
-          <h2>⚧️ Geschlecht <span class="hint">= Geschmack</span></h2>
-          <div class="chip-grid" id="genders">
+        <div class="selector-card ${selection.country ? (selection.gender ? 'active' : '') : 'disabled'}">
+          <div class="step-header">
+            <span class="step-num">02</span>
+            <div>
+              <h2>⚧️ Geschlecht</h2>
+              <p class="step-desc">Bestimmt deinen Geschmack</p>
+            </div>
+          </div>
+          <div class="chip-grid genders" id="genders">
             ${GENDER_OPTIONS.map((g) => `
               <button type="button" class="chip ${selection.gender === g.id ? 'selected' : ''}" data-gender="${g.id}" ${selection.country ? '' : 'disabled'}>
                 ${g.icon} ${esc(g.label)}
@@ -71,11 +95,17 @@ function render() {
           </div>
         </div>
 
-        <div class="selector-block ${selection.gender ? '' : 'disabled'}">
-          <h2>🌈 Sexualität <span class="hint">= Aroma</span></h2>
-          <div class="chip-list" id="sexualities">
+        <div class="selector-card ${selection.gender ? (selection.sexuality ? 'active' : '') : 'disabled'}">
+          <div class="step-header">
+            <span class="step-num">03</span>
+            <div>
+              <h2>🌈 Sexualität</h2>
+              <p class="step-desc">Bestimmt dein Aroma</p>
+            </div>
+          </div>
+          <div class="aroma-grid" id="sexualities">
             ${selection.gender ? getSexualityOptions().map((o) => `
-              <button type="button" class="chip-row ${selection.sexuality === o.label ? 'selected' : ''}" data-sexuality="${esc(o.label)}">
+              <button type="button" class="aroma-card ${selection.sexuality === o.label ? 'selected' : ''}" data-sexuality="${esc(o.label)}">
                 <strong>${esc(o.label)}</strong>
                 <span>${esc(o.aroma)}</span>
               </button>
@@ -85,64 +115,78 @@ function render() {
 
         ${profile && country ? `
           <div class="preview-box">
-            <p>Deine Milch:</p>
-            <strong>${country.flag} ${esc(country.sorte)}</strong>
-            <span>⚧️ ${esc(profile.taste)} · 🌈 ${esc(profile.aroma)}</span>
+            <p class="preview-label">Deine Milch</p>
+            <div class="preview-sorte">
+              <span>${country.flag}</span>
+              <span>${esc(country.sorte)}</span>
+            </div>
+            <div class="preview-tags">
+              <span class="preview-tag">⚧️ ${esc(profile.taste)}</span>
+              <span class="preview-tag">🌈 ${esc(profile.aroma)}</span>
+            </div>
           </div>
         ` : ''}
-
-        <button type="button" class="btn btn-start" id="start-game" ${isReady() ? '' : 'disabled'}>
-          🎮 Spiel starten
-        </button>
       </section>
 
-      <!-- Spiel: Glas -->
+      <div class="cta-bar">
+        <div class="cta-inner">
+          <button type="button" class="btn btn-start ${isReady() ? 'ready' : ''}" id="start-game" ${isReady() ? '' : 'disabled'}>
+            🎮 Spiel starten
+          </button>
+        </div>
+      </div>
+
       <section class="game" id="game">
-        <header class="stream-header">
-          <button type="button" class="back-setup" id="back-setup">← Zurück</button>
-          <span class="live-badge">● LIVE</span>
-          <h1>Gif This Milk</h1>
-          <p class="stream-slogan">gif this milk</p>
-        </header>
+        <div class="game-stage">
+          <header class="stream-header">
+            <button type="button" class="back-setup" id="back-setup">← Zurück</button>
+            <span class="live-badge">LIVE</span>
+            <h1>Gif This Milk</h1>
+            <p class="stream-slogan">gif this milk</p>
+          </header>
 
-        ${profile && country ? `
-          <div class="stream-info">
-            <span>${country.flag} ${esc(country.sorte)}</span>
-            <span>⚧️ ${esc(profile.taste)}</span>
-            <span>🌈 ${esc(profile.aroma)}</span>
+          ${profile && country ? `
+            <div class="stream-info">
+              <span>${country.flag} ${esc(country.sorte)}</span>
+              <span>⚧️ ${esc(profile.taste)}</span>
+              <span>🌈 ${esc(profile.aroma)}</span>
+            </div>
+          ` : ''}
+
+          <div class="machine-mini">
+            <div class="machine-mini-body">
+              <div class="machine-mini-tank"></div>
+              <div class="machine-mini-nozzle"></div>
+            </div>
+            <div class="stream-pour ${streamState.pouring ? 'active' : ''}"></div>
           </div>
-        ` : ''}
 
-        <div class="machine-mini">
-          <div class="machine-mini-body">
-            <div class="machine-mini-tank"></div>
-            <div class="machine-mini-nozzle"></div>
+          <div class="glass-wrap">
+            <div class="glass ${streamState.drinking ? 'drinking' : ''}" id="glass">
+              <div class="glass-milk" style="height:${streamState.fill}%"></div>
+              <div class="glass-shine"></div>
+            </div>
+            <p class="glass-label">${streamState.fill >= 100 ? 'Voll — trinken!' : `${Math.round(streamState.fill)}% voll`}</p>
+            <div class="fill-ring" aria-hidden="true">
+              <div class="fill-ring-bar" style="width:${streamState.fill}%"></div>
+            </div>
           </div>
-          <div class="stream-pour ${streamState.pouring ? 'active' : ''}"></div>
-        </div>
 
-        <div class="glass-wrap">
-          <div class="glass ${streamState.drinking ? 'drinking' : ''}" id="glass">
-            <div class="glass-milk" style="height:${streamState.fill}%"></div>
-            <div class="glass-shine"></div>
+          <div class="stream-toast ${streamState.toast ? 'show' : ''}">${esc(streamState.toast || '')}</div>
+
+          <div class="stream-actions">
+            <button type="button" class="like-btn" id="like-btn" ${streamState.fill >= 100 ? 'disabled' : ''}>
+              ❤️ Like <span>${streamState.likes}</span>
+            </button>
+            <button type="button" class="drink-btn ${streamState.fill >= 100 ? 'show' : ''}" id="drink-btn">
+              🥤 Trinken
+            </button>
           </div>
-          <p class="glass-label">${streamState.fill >= 100 ? 'Voll — trinken!' : `${Math.round(streamState.fill)}% voll`}</p>
+
+          <p class="stream-hint">
+            ${streamState.fill >= 100 ? 'Glas voll — tippe Trinken!' : 'Like = Milch ins Glas. Bei 100% trinken.'}
+          </p>
         </div>
-
-        <div class="stream-toast ${streamState.toast ? 'show' : ''}">${esc(streamState.toast || '')}</div>
-
-        <div class="stream-actions">
-          <button type="button" class="like-btn" id="like-btn" ${streamState.fill >= 100 ? 'disabled' : ''}>
-            ❤️ Like <span>${streamState.likes}</span>
-          </button>
-          <button type="button" class="drink-btn ${streamState.fill >= 100 ? 'show' : ''}" id="drink-btn">
-            🥤 Trinken
-          </button>
-        </div>
-
-        <p class="stream-hint">
-          ${streamState.fill >= 100 ? 'Glas voll — tippe Trinken!' : 'Like = Milch ins Glas. Bei 100% trinken.'}
-        </p>
       </section>
     </div>
   `;
