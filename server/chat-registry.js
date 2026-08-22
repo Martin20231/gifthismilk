@@ -116,7 +116,7 @@ function handleChat(user, comment) {
       field: parsed.field,
       label: parsed.label,
       missing,
-      message: `@${user}: ${parsed.field} ✓ — noch: ${missing.join(', ')}`,
+      message: `@${user}: ${fieldLabel(parsed.field)} ✓ — noch: ${missing.join(', ')}`,
     };
     emit(event);
     return event;
