@@ -15,11 +15,19 @@ function createTikTokBridge(username, onEvent) {
   const live = new TikTokLive(username);
 
   live.on('chat', (e) => {
-    const comment = (e.comment || '').trim().toLowerCase();
-    if (comment === '!milch' || comment === '!gif') {
+    const comment = (e.comment || '').trim();
+    const lower = comment.toLowerCase();
+    const user = e.user?.uniqueId || 'anonymous';
+
+    if (lower === 'trinken' || lower === '!trinken' || lower.startsWith('trinken ')) {
+      onEvent({ type: 'chat', user, comment, action: 'drink' });
+      return;
+    }
+
+    if (lower === '!milch' || lower === '!gif') {
       onEvent({
         type: 'chat',
-        user: e.user?.uniqueId || 'anonymous',
+        user,
         action: 'press',
       });
     }

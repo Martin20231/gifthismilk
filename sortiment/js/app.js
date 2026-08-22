@@ -3,11 +3,14 @@ import {
   GENDER_OPTIONS,
   getCountry,
   getSexualityOptions,
-  getStreamState,
-  resetStreamState,
   resolveMilkProfile,
-  saveStreamState,
 } from './data.js';
+import {
+  connectStream,
+  startLiveSession,
+  onStreamState,
+  isLiveMode,
+} from './stream-client.js';
 
 const app = document.getElementById('app');
 
@@ -28,8 +31,18 @@ const selection = {
   sexuality: null,
 };
 
-let streamState = getStreamState();
 let gameActive = false;
+let streamState = {
+  fill: 0,
+  likes: 0,
+  drunk: 0,
+  pouring: false,
+  drinking: false,
+  toast: '',
+  lastActor: null,
+};
+let streamMode = isLiveMode() ? 'connecting' : 'demo';
+let unsubStream = null;
 
 function esc(str) {
   const d = document.createElement('div');
@@ -63,9 +76,20 @@ function renderSteps() {
   }).join('');
 }
 
+function liveStatusHtml() {
+  if (streamMode === 'live') {
+    return '<span class="conn-badge conn-live">🔴 TikTok Live verbunden</span>';
+  }
+  if (streamMode === 'connecting') {
+    return '<span class="conn-badge conn-wait">⏳ Verbinde mit Live-Server…</span>';
+  }
+  return '<span class="conn-badge conn-demo">📱 Demo — starte Server für TikTok Live</span>';
+}
+
 function render() {
   const profile = getProfile();
   const country = selection.country ? getCountry(selection.country) : null;
+  const isLive = streamMode === 'live';
 
   app.innerHTML = `
     <div class="shell ${gameActive ? 'is-game' : ''}">
@@ -80,21 +104,17 @@ function render() {
         </header>
 
         <div class="hero">
-          <div class="hero-pill">🔴 TikTok Live Style</div>
+          <div class="hero-pill">🔴 TikTok Live</div>
           <h1>Mix deine<br><em>Milch</em></h1>
-          <p class="hero-sub">Land · Geschlecht · Aroma — dann live ins Glas.</p>
+          <p class="hero-sub">Like füllt das Glas für alle · Chat „trinken“ wenn voll</p>
           <div class="step-track">${renderSteps()}</div>
         </div>
 
         <div class="bento">
-
           <article class="bento-card card-land ${selection.country ? 'has-value' : ''}">
             <div class="card-head">
               <span class="card-num">01</span>
-              <div>
-                <h2>Land</h2>
-                <p>= deine Sorte</p>
-              </div>
+              <div><h2>Land</h2><p>= deine Sorte</p></div>
             </div>
             <div class="flag-grid" id="countries">
               ${COUNTRIES.map((c) => `
@@ -109,10 +129,7 @@ function render() {
           <article class="bento-card card-gender ${!selection.country ? 'locked' : selection.gender ? 'has-value' : ''}">
             <div class="card-head">
               <span class="card-num">02</span>
-              <div>
-                <h2>Geschlecht</h2>
-                <p>= dein Geschmack</p>
-              </div>
+              <div><h2>Geschlecht</h2><p>= dein Geschmack</p></div>
             </div>
             <div class="gender-row" id="genders">
               ${GENDER_OPTIONS.map((g) => `
@@ -127,10 +144,7 @@ function render() {
           <article class="bento-card card-aroma ${!selection.gender ? 'locked' : selection.sexuality ? 'has-value' : ''}">
             <div class="card-head">
               <span class="card-num">03</span>
-              <div>
-                <h2>Sexualität</h2>
-                <p>= dein Aroma</p>
-              </div>
+              <div><h2>Sexualität</h2><p>= dein Aroma</p></div>
             </div>
             <div class="aroma-grid" id="sexualities">
               ${selection.gender ? getSexualityOptions().map((o) => `
@@ -142,7 +156,6 @@ function render() {
               `).join('') : '<p class="lock-msg">🔒 Erst Land & Geschlecht wählen</p>'}
             </div>
           </article>
-
         </div>
 
         ${profile && country ? `
@@ -177,6 +190,8 @@ function render() {
             <span class="live-dot">LIVE</span>
           </header>
 
+          ${liveStatusHtml()}
+
           ${profile && country ? `
             <div class="live-tags">
               <span>${country.flag} ${esc(country.sorte)}</span>
@@ -184,6 +199,11 @@ function render() {
               <span>🌈 ${esc(profile.aroma)}</span>
             </div>
           ` : ''}
+
+          <div class="live-rules">
+            <div class="rule"><span>❤️</span> Like = Milch für alle</div>
+            <div class="rule"><span>💬</span> Chat: <strong>trinken</strong></div>
+          </div>
 
           <div class="live-stage">
             <div class="dispenser">
@@ -200,22 +220,22 @@ function render() {
                 <div class="glass-glare"></div>
               </div>
               <div class="fill-bar"><div class="fill-bar-inner" style="width:${streamState.fill}%"></div></div>
-              <p class="fill-text">${streamState.fill >= 100 ? '🥛 Voll — trinken!' : `${Math.round(streamState.fill)}% im Glas`}</p>
+              <p class="fill-text">${streamState.fill >= 100 ? '🥛 Voll — schreib trinken!' : `${Math.round(streamState.fill)}% im Glas`}</p>
+              <p class="fill-meta">❤️ ${streamState.likes} Likes · 🥤 ${streamState.drunk}× getrunken</p>
             </div>
           </div>
 
           <div class="live-toast ${streamState.toast ? 'show' : ''}">${esc(streamState.toast || '')}</div>
 
-          <div class="live-actions">
-            <button type="button" class="btn-like" id="like-btn" ${streamState.fill >= 100 ? 'disabled' : ''}>
-              ❤️ Like <b>${streamState.likes}</b>
-            </button>
-            <button type="button" class="btn-drink ${streamState.fill >= 100 ? 'show' : ''}" id="drink-btn">
-              🥤 Trinken
-            </button>
-          </div>
-
-          <p class="live-hint">${streamState.fill >= 100 ? 'Glas voll — jetzt trinken!' : 'Jeder Like füllt dein Glas 🥛'}</p>
+          ${isLive ? `
+            <p class="live-hint live-hint-main">Gesteuert durch TikTok Live — alle sehen dasselbe Glas</p>
+          ` : `
+            <div class="live-actions">
+              <button type="button" class="btn-like" id="demo-like">❤️ Demo-Like</button>
+              <button type="button" class="btn-drink ${streamState.fill >= 100 ? 'show' : ''}" id="demo-drink">💬 Demo: trinken</button>
+            </div>
+            <p class="live-hint">Demo-Modus — für TikTok: <code>npm start</code> + <code>TIKTOK_USERNAME</code></p>
+          `}
         </div>
       </section>
 
@@ -223,6 +243,34 @@ function render() {
   `;
 
   bindEvents();
+}
+
+function applyStreamUpdate(data) {
+  if (data.mode === 'demo') {
+    streamMode = 'demo';
+    render();
+    return;
+  }
+
+  if (data.connected === false) {
+    streamMode = 'connecting';
+    render();
+    return;
+  }
+
+  if (data.connected || data.fill !== undefined) {
+    streamMode = 'live';
+    streamState = {
+      fill: data.fill ?? streamState.fill,
+      likes: data.likes ?? streamState.likes,
+      drunk: data.drunk ?? streamState.drunk,
+      pouring: data.pouring ?? false,
+      drinking: data.drinking ?? false,
+      toast: data.toast ?? streamState.toast,
+      lastActor: data.lastActor ?? streamState.lastActor,
+    };
+    render();
+  }
 }
 
 function bindEvents() {
@@ -253,9 +301,17 @@ function bindEvents() {
 
   document.getElementById('start-game')?.addEventListener('click', () => {
     if (!isReady()) return;
-    resetStreamState();
-    streamState = getStreamState();
+    const profile = getProfile();
+    const country = getCountry(selection.country);
     gameActive = true;
+    streamState = { fill: 0, likes: 0, drunk: 0, pouring: false, drinking: false, toast: '', lastActor: null };
+    startLiveSession({
+      sorte: country?.sorte,
+      flag: country?.flag,
+      taste: profile?.taste,
+      aroma: profile?.aroma,
+      sexuality: profile?.sexuality,
+    });
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -266,42 +322,50 @@ function bindEvents() {
     document.getElementById('setup')?.scrollIntoView({ behavior: 'smooth' });
   });
 
-  document.getElementById('like-btn')?.addEventListener('click', onLike);
-  document.getElementById('drink-btn')?.addEventListener('click', onDrink);
+  document.getElementById('demo-like')?.addEventListener('click', () => {
+    if (streamMode === 'live') return;
+    handleLocalLike('Demo-Zuschauer');
+  });
+  document.getElementById('demo-drink')?.addEventListener('click', () => {
+    if (streamMode === 'live') return;
+    handleLocalDrink('Demo-Zuschauer');
+  });
 }
 
-function onLike() {
-  if (streamState.fill >= 100) return;
+function handleLocalLike(user) {
+  if (streamState.fill >= 100 || streamState.drinking) return;
   streamState.likes += 1;
   const boost = 8 + Math.floor(Math.random() * 10);
   streamState.fill = Math.min(100, streamState.fill + boost);
   streamState.pouring = true;
-  streamState.toast = `+${boost}% Milch! ❤️`;
-  streamState.drinking = false;
-  saveStreamState(streamState);
+  streamState.toast = `❤️ ${user} +${boost}% Milch!`;
   render();
   setTimeout(() => {
     streamState.pouring = false;
-    if (streamState.fill >= 100) streamState.toast = '🥛 Voll — jetzt trinken!';
-    saveStreamState(streamState);
+    if (streamState.fill >= 100) streamState.toast = '🥛 Voll — schreib trinken!';
     render();
-  }, 650);
+  }, 700);
 }
 
-function onDrink() {
-  if (streamState.fill < 100) return;
-  streamState.drunk = (streamState.drunk || 0) + 1;
+function handleLocalDrink(user) {
+  if (streamState.fill < 100 || streamState.drinking) return;
+  streamState.drunk += 1;
   streamState.drinking = true;
-  streamState.toast = 'Schluck schluck… gif this milk! 🥛';
-  saveStreamState(streamState);
+  streamState.toast = `🥤 ${user} trinkt! gif this milk!`;
   render();
   setTimeout(() => {
     streamState.fill = 0;
     streamState.drinking = false;
-    streamState.toast = `${streamState.drunk}× getrunken — keep liking!`;
-    saveStreamState(streamState);
+    streamState.toast = `${streamState.drunk}× getrunken — weiter liken!`;
     render();
-  }, 1300);
+  }, 1400);
 }
 
+function initStream() {
+  unsubStream = onStreamState(applyStreamUpdate);
+  connectStream();
+  streamMode = isLiveMode() ? 'connecting' : 'demo';
+}
+
+initStream();
 render();

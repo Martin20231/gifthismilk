@@ -13,9 +13,24 @@ TikTok Live Milch-Automat — interaktiv, meme-tauglich, OBS-ready.
 | Seite | URL |
 |-------|-----|
 | Demo | `/` |
+| Sortiment (Milch-Mix + Live-Glas) | `/sortiment/` |
 | OBS-Overlay | `/overlay.html` |
 
-> Pages = Browser-Demo ohne Server. TikTok Live braucht `npm start` lokal.
+> Pages = Browser-Demo ohne Server. **TikTok Live Sync** braucht `npm start` lokal oder einen gehosteten Server.
+
+## Sortiment + TikTok Live
+
+1. Milch zusammenstellen → **Spiel starten**
+2. **Likes** im Stream füllen das Glas für **alle** Zuschauer gleichzeitig
+3. Im Chat **`trinken`** schreiben → Glas wird geleert (nur wenn 100% voll)
+
+```bash
+npm install
+TIKTOK_USERNAME=dein_username npm start
+```
+
+- **Sortiment:** http://localhost:3847/sortiment/
+- Zuschauer öffnen dieselbe URL (mit `?server=https://dein-server.de` wenn gehostet)
 
 ## Lokal mit TikTok
 
