@@ -1,269 +1,106 @@
 export const CONCEPT = {
-  land: { icon: '🌍', title: 'Land = Sorte', text: 'Das Herkunftsland bestimmt die jeweilige Sorte.' },
-  gender: { icon: '⚧️', title: 'Geschlecht = Geschmacksprofil', text: 'Freiwillig angegebene Geschlechtsidentität als geschmackliche Variante.' },
-  sexuality: { icon: '🌈', title: 'Sexualität = Aroma', text: 'Freiwillig angegebene Orientierung ergänzt das Aromaprofil.' },
+  land: { icon: '🌍', title: 'Land = Sorte', text: 'Wähle dein Herkunftsland.' },
+  gender: { icon: '⚧️', title: 'Geschlecht = Geschmack', text: 'Bestimmt dein Geschmacksprofil.' },
+  sexuality: { icon: '🌈', title: 'Sexualität = Aroma', text: 'Ergänzt dein Aromaprofil.' },
 };
 
+export const GENDER_OPTIONS = [
+  { id: 'frauen', label: 'Frau', icon: '👩', desc: 'Weibliches Geschmacksprofil' },
+  { id: 'maenner', label: 'Mann', icon: '👨', desc: 'Männliches Geschmacksprofil' },
+  { id: 'divers', label: 'Divers', icon: '🧑', desc: 'Diverses Geschmacksprofil' },
+];
+
 export const COUNTRIES = [
-  { code: 'de', name: 'Deutschland', flag: '🇩🇪', sorte: 'Alpen-Milch', region: 'Mitteleuropa' },
-  { code: 'at', name: 'Österreich', flag: '🇦🇹', sorte: 'Almen-Milch', region: 'Mitteleuropa' },
-  { code: 'ch', name: 'Schweiz', flag: '🇨🇭', sorte: 'Edel-Milch', region: 'Mitteleuropa' },
-  { code: 'it', name: 'Italien', flag: '🇮🇹', sorte: 'Espresso-Milch', region: 'Südeuropa' },
-  { code: 'fr', name: 'Frankreich', flag: '🇫🇷', sorte: 'Crème-Milch', region: 'Westeuropa' },
-  { code: 'es', name: 'Spanien', flag: '🇪🇸', sorte: 'Sierra-Milch', region: 'Südeuropa' },
-  { code: 'nl', name: 'Niederlande', flag: '🇳🇱', sorte: 'Käse-Milch', region: 'Westeuropa' },
-  { code: 'pl', name: 'Polen', flag: '🇵🇱', sorte: 'Wiesen-Milch', region: 'Osteuropa' },
+  { code: 'de', name: 'Deutschland', flag: '🇩🇪', sorte: 'Alpen-Milch' },
+  { code: 'at', name: 'Österreich', flag: '🇦🇹', sorte: 'Almen-Milch' },
+  { code: 'ch', name: 'Schweiz', flag: '🇨🇭', sorte: 'Edel-Milch' },
+  { code: 'it', name: 'Italien', flag: '🇮🇹', sorte: 'Espresso-Milch' },
+  { code: 'fr', name: 'Frankreich', flag: '🇫🇷', sorte: 'Crème-Milch' },
+  { code: 'es', name: 'Spanien', flag: '🇪🇸', sorte: 'Sierra-Milch' },
+  { code: 'nl', name: 'Niederlande', flag: '🇳🇱', sorte: 'Käse-Milch' },
+  { code: 'pl', name: 'Polen', flag: '🇵🇱', sorte: 'Wiesen-Milch' },
 ];
 
 export const PROFILES = [
-  {
-    id: 'de-f1',
-    country: 'de',
-    name: 'Lea M.',
-    age: 27,
-    gender: 'Frau',
-    sexuality: 'Heterosexuell',
-    taste: 'Sanft-nussig',
-    aroma: 'Vanille & Honig',
-    bio: 'Berlin, Kaffee-Liebhaberin. Mag milde Sorten mit warmem Abgang.',
-  },
-  {
-    id: 'de-m1',
-    country: 'de',
-    name: 'Jonas K.',
-    age: 31,
-    gender: 'Mann',
-    sexuality: 'Schwul',
-    taste: 'Kräuterig-frisch',
-    aroma: 'Minze & Zitrone',
-    bio: 'Hamburg, Outdoor-Fan. Bevorzugt klare, leichte Profile.',
-  },
-  {
-    id: 'de-f2',
-    country: 'de',
-    name: 'Sam R.',
-    age: 24,
-    gender: 'Nicht-binär',
-    sexuality: 'Pansexuell',
-    taste: 'Blumig-leicht',
-    aroma: 'Lavendel & Pfirsich',
-    bio: 'Köln, Kreativschaffende*r. Mixt gerne verschiedene Nuancen.',
-  },
-  {
-    id: 'de-m2',
-    country: 'de',
-    name: 'Tim W.',
-    age: 29,
-    gender: 'Mann',
-    sexuality: 'Bisexuell',
-    taste: 'Cremig-ausgewogen',
-    aroma: 'Karamell & Meersalz',
-    bio: 'München, Food-Blogger. Liebt vielseitige Geschmacksnoten.',
-  },
-  {
-    id: 'at-f1',
-    country: 'at',
-    name: 'Hannah S.',
-    age: 26,
-    gender: 'Frau',
-    sexuality: 'Lesbisch',
-    taste: 'Alpin-herb',
-    aroma: 'Bergkräuter & Thymian',
-    bio: 'Salzburg, Bergwandern ist Pflicht. Sorte mit Charakter.',
-  },
-  {
-    id: 'at-m1',
-    country: 'at',
-    name: 'Felix H.',
-    age: 33,
-    gender: 'Mann',
-    sexuality: 'Heterosexuell',
-    taste: 'Würzig-tief',
-    aroma: 'Rauch & Walnuss',
-    bio: 'Graz, Musiker. Dunklere Profile mit langer Note.',
-  },
-  {
-    id: 'ch-f1',
-    country: 'ch',
-    name: 'Noemi B.',
-    age: 30,
-    gender: 'Frau',
-    sexuality: 'Asexuell',
-    taste: 'Rein & minimalistisch',
-    aroma: 'Reine Milchnote',
-    bio: 'Zürich, Minimalistin. Weniger ist mehr — Fokus auf Klarheit.',
-  },
-  {
-    id: 'ch-m1',
-    country: 'ch',
-    name: 'Marco L.',
-    age: 35,
-    gender: 'Mann',
-    sexuality: 'Schwul',
-    taste: 'Edel-samtig',
-    aroma: 'Trüffel & Sahne',
-    bio: 'Genf, Sommelier. Premium-Sorten mit feiner Textur.',
-  },
-  {
-    id: 'it-f1',
-    country: 'it',
-    name: 'Giulia F.',
-    age: 28,
-    gender: 'Frau',
-    sexuality: 'Heterosexuell',
-    taste: 'Intensiv-sonnig',
-    aroma: 'Espresso & Kakao',
-    bio: 'Mailand, Barista. Starke, mediterrane Profile.',
-  },
-  {
-    id: 'it-m1',
-    country: 'it',
-    name: 'Luca P.',
-    age: 32,
-    gender: 'Mann',
-    sexuality: 'Bisexuell',
-    taste: 'Fruchtig-warm',
-    aroma: 'Feige & Orange',
-    bio: 'Rom, Designer. Süße Wärme mit italienischem Flair.',
-  },
-  {
-    id: 'fr-f1',
-    country: 'fr',
-    name: 'Camille D.',
-    age: 29,
-    gender: 'Frau',
-    sexuality: 'Pansexuell',
-    taste: 'Elegant-floral',
-    aroma: 'Rose & Butter',
-    bio: 'Paris, Autorin. Poetische Sorten mit weichem Finish.',
-  },
-  {
-    id: 'fr-m1',
-    country: 'fr',
-    name: 'Antoine R.',
-    age: 34,
-    gender: 'Mann',
-    sexuality: 'Schwul',
-    taste: 'Komplex-reif',
-    aroma: 'Brioche & Haselnuss',
-    bio: 'Lyon, Bäcker. Reife Profile mit französischer Eleganz.',
-  },
-  {
-    id: 'es-f1',
-    country: 'es',
-    name: 'Elena V.',
-    age: 25,
-    gender: 'Frau',
-    sexuality: 'Lesbisch',
-    taste: 'Feurig-spritzig',
-    aroma: 'Zitrus & Chili',
-    bio: 'Barcelona, Tänzerin. Lebendige Sorten mit Kick.',
-  },
-  {
-    id: 'es-m1',
-    country: 'es',
-    name: 'Diego A.',
-    age: 30,
-    gender: 'Mann',
-    sexuality: 'Heterosexuell',
-    taste: 'Rauchig-süß',
-    aroma: 'Paprika & Dattel',
-    bio: 'Madrid, Koch. Tapas-inspirierte Aromen.',
-  },
-  {
-    id: 'nl-f1',
-    country: 'nl',
-    name: 'Femke J.',
-    age: 27,
-    gender: 'Frau',
-    sexuality: 'Demisexuell',
-    taste: 'Sanft-käsig',
-    aroma: 'Gouda & Kräuter',
-    bio: 'Amsterdam, Illustratorin. Verbindet Nähe mit Tiefe.',
-  },
-  {
-    id: 'nl-m1',
-    country: 'nl',
-    name: 'Daan V.',
-    age: 28,
-    gender: 'Mann',
-    sexuality: 'Queer',
-    taste: 'Modern-klar',
-    aroma: 'Stroh & Linde',
-    bio: 'Rotterdam, Urban Farmer. Frische, ehrliche Profile.',
-  },
-  {
-    id: 'pl-f1',
-    country: 'pl',
-    name: 'Zofia K.',
-    age: 26,
-    gender: 'Frau',
-    sexuality: 'Heterosexuell',
-    taste: 'Wiesig-erdig',
-    aroma: 'Heu & Brombeere',
-    bio: 'Krakau, Botanikerin. Naturnahe Sorten aus dem Osten.',
-  },
-  {
-    id: 'pl-m1',
-    country: 'pl',
-    name: 'Kacper N.',
-    age: 31,
-    gender: 'Mann',
-    sexuality: 'Schwul',
-    taste: 'Kräftig-rustikal',
-    aroma: 'Roggen & Honig',
-    bio: 'Warschau, Architekt. Bodenständig mit Tiefgang.',
-  },
+  { id: 'de-f1', country: 'de', name: 'Lea M.', age: 27, gender: 'Frau', sexuality: 'Heterosexuell', taste: 'Sanft-nussig', aroma: 'Vanille & Honig', bio: 'Berlin — milde Sorten mit warmem Abgang.' },
+  { id: 'de-m1', country: 'de', name: 'Jonas K.', age: 31, gender: 'Mann', sexuality: 'Schwul', taste: 'Kräuterig-frisch', aroma: 'Minze & Zitrone', bio: 'Hamburg — klare, leichte Profile.' },
+  { id: 'de-f2', country: 'de', name: 'Sam R.', age: 24, gender: 'Nicht-binär', sexuality: 'Pansexuell', taste: 'Blumig-leicht', aroma: 'Lavendel & Pfirsich', bio: 'Köln — vielseitige Nuancen.' },
+  { id: 'de-m2', country: 'de', name: 'Tim W.', age: 29, gender: 'Mann', sexuality: 'Bisexuell', taste: 'Cremig-ausgewogen', aroma: 'Karamell & Meersalz', bio: 'München — ausgewogene Noten.' },
+  { id: 'at-f1', country: 'at', name: 'Hannah S.', age: 26, gender: 'Frau', sexuality: 'Lesbisch', taste: 'Alpin-herb', aroma: 'Bergkräuter & Thymian', bio: 'Salzburg — Sorte mit Charakter.' },
+  { id: 'at-m1', country: 'at', name: 'Felix H.', age: 33, gender: 'Mann', sexuality: 'Heterosexuell', taste: 'Würzig-tief', aroma: 'Rauch & Walnuss', bio: 'Graz — dunkle, reife Profile.' },
+  { id: 'ch-f1', country: 'ch', name: 'Noemi B.', age: 30, gender: 'Frau', sexuality: 'Asexuell', taste: 'Rein & klar', aroma: 'Reine Milchnote', bio: 'Zürich — Fokus auf Klarheit.' },
+  { id: 'ch-m1', country: 'ch', name: 'Marco L.', age: 35, gender: 'Mann', sexuality: 'Schwul', taste: 'Edel-samtig', aroma: 'Trüffel & Sahne', bio: 'Genf — Premium-Textur.' },
+  { id: 'it-f1', country: 'it', name: 'Giulia F.', age: 28, gender: 'Frau', sexuality: 'Heterosexuell', taste: 'Intensiv-sonnig', aroma: 'Espresso & Kakao', bio: 'Mailand — mediterrane Stärke.' },
+  { id: 'it-m1', country: 'it', name: 'Luca P.', age: 32, gender: 'Mann', sexuality: 'Bisexuell', taste: 'Fruchtig-warm', aroma: 'Feige & Orange', bio: 'Rom — süße Wärme.' },
+  { id: 'fr-f1', country: 'fr', name: 'Camille D.', age: 29, gender: 'Frau', sexuality: 'Pansexuell', taste: 'Elegant-floral', aroma: 'Rose & Butter', bio: 'Paris — poetische Sorten.' },
+  { id: 'fr-m1', country: 'fr', name: 'Antoine R.', age: 34, gender: 'Mann', sexuality: 'Schwul', taste: 'Komplex-reif', aroma: 'Brioche & Haselnuss', bio: 'Lyon — französische Eleganz.' },
+  { id: 'es-f1', country: 'es', name: 'Elena V.', age: 25, gender: 'Frau', sexuality: 'Lesbisch', taste: 'Feurig-spritzig', aroma: 'Zitrus & Chili', bio: 'Barcelona — lebendige Sorten.' },
+  { id: 'es-m1', country: 'es', name: 'Diego A.', age: 30, gender: 'Mann', sexuality: 'Heterosexuell', taste: 'Rauchig-süß', aroma: 'Paprika & Dattel', bio: 'Madrid — tapas-inspiriert.' },
+  { id: 'nl-f1', country: 'nl', name: 'Femke J.', age: 27, gender: 'Frau', sexuality: 'Demisexuell', taste: 'Sanft-käsig', aroma: 'Gouda & Kräuter', bio: 'Amsterdam — Verbindung & Tiefe.' },
+  { id: 'nl-m1', country: 'nl', name: 'Daan V.', age: 28, gender: 'Mann', sexuality: 'Queer', taste: 'Modern-klar', aroma: 'Stroh & Linde', bio: 'Rotterdam — frisch & ehrlich.' },
+  { id: 'pl-f1', country: 'pl', name: 'Zofia K.', age: 26, gender: 'Frau', sexuality: 'Heterosexuell', taste: 'Wiesig-erdig', aroma: 'Heu & Brombeere', bio: 'Krakau — naturnahe Sorten.' },
+  { id: 'pl-m1', country: 'pl', name: 'Kacper N.', age: 31, gender: 'Mann', sexuality: 'Schwul', taste: 'Kräftig-rustikal', aroma: 'Roggen & Honig', bio: 'Warschau — bodenständig.' },
 ];
+
+const SELECTION_KEY = 'gtm-wizard-selection';
+
+function matchGender(profile, genderKey) {
+  if (genderKey === 'frauen') return profile.gender === 'Frau';
+  if (genderKey === 'maenner') return profile.gender === 'Mann';
+  if (genderKey === 'divers') return profile.gender !== 'Frau' && profile.gender !== 'Mann';
+  return true;
+}
 
 export function getCountry(code) {
   return COUNTRIES.find((c) => c.code === code);
 }
 
-export function getProfilesByCountry(code, genderFilter = 'all') {
-  return PROFILES.filter((p) => {
-    if (p.country !== code) return false;
-    if (genderFilter === 'all') return true;
-    if (genderFilter === 'frauen') return p.gender === 'Frau';
-    if (genderFilter === 'maenner') return p.gender === 'Mann';
-    if (genderFilter === 'divers') return p.gender !== 'Frau' && p.gender !== 'Mann';
-    return true;
-  });
+export function getGenderOption(id) {
+  return GENDER_OPTIONS.find((g) => g.id === id);
 }
 
-export function getProfile(id) {
-  return PROFILES.find((p) => p.id === id);
+export function getProfilesForSelection(country, genderKey) {
+  return PROFILES.filter((p) => p.country === country && matchGender(p, genderKey));
 }
 
-export function buildMilkProduct(profile) {
-  const country = getCountry(profile.country);
-  return {
-    id: profile.id,
-    label: `${profile.name} Milch™`,
-    sorte: country.sorte,
-    land: `${country.flag} ${country.name}`,
-    geschmack: profile.taste,
-    aroma: profile.aroma,
-    createdAt: Date.now(),
-  };
+export function getSexualityOptions(country, genderKey) {
+  return getProfilesForSelection(country, genderKey);
 }
 
-const STORAGE_KEY = 'gif-this-milk-sammlung';
-
-export function saveToCollection(profileId) {
-  const profile = getProfile(profileId);
-  if (!profile) return null;
-  const product = buildMilkProduct(profile);
-  const list = getCollection().filter((p) => p.id !== profileId);
-  list.unshift(product);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, 20)));
-  return product;
+export function findProfile(country, genderKey, sexuality) {
+  return PROFILES.find(
+    (p) => p.country === country && matchGender(p, genderKey) && p.sexuality === sexuality,
+  );
 }
 
-export function getCollection() {
+export function saveSelection(data) {
+  localStorage.setItem(SELECTION_KEY, JSON.stringify(data));
+}
+
+export function getSelection() {
   try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    return JSON.parse(localStorage.getItem(SELECTION_KEY) || 'null');
   } catch {
-    return [];
+    return null;
   }
+}
+
+export function clearSelection() {
+  localStorage.removeItem(SELECTION_KEY);
+}
+
+export function getStreamState() {
+  try {
+    return JSON.parse(localStorage.getItem('gtm-stream-state') || '{"fill":0,"likes":0,"drunk":0}');
+  } catch {
+    return { fill: 0, likes: 0, drunk: 0 };
+  }
+}
+
+export function saveStreamState(state) {
+  localStorage.setItem('gtm-stream-state', JSON.stringify(state));
+}
+
+export function resetStreamState() {
+  saveStreamState({ fill: 0, likes: 0, drunk: 0 });
 }

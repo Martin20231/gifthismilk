@@ -1,21 +1,20 @@
 import {
   CONCEPT,
   COUNTRIES,
+  GENDER_OPTIONS,
+  clearSelection,
+  findProfile,
   getCountry,
-  getProfile,
-  getProfilesByCountry,
-  saveToCollection,
-  getCollection,
-  buildMilkProduct,
+  getGenderOption,
+  getSelection,
+  getSexualityOptions,
+  getStreamState,
+  resetStreamState,
+  saveSelection,
+  saveStreamState,
 } from './data.js';
 
 const app = document.getElementById('app');
-
-function parseRoute() {
-  const hash = location.hash.slice(1) || '/';
-  const parts = hash.split('/').filter(Boolean);
-  return { parts, raw: hash };
-}
 
 function nav(path) {
   location.hash = path;
@@ -23,39 +22,48 @@ function nav(path) {
 
 function esc(str) {
   const d = document.createElement('div');
-  d.textContent = str;
+  d.textContent = str ?? '';
   return d.innerHTML;
 }
 
-function layout(content, { back = null, title = 'Gif This Milk — Sortiment' } = {}) {
+function parseRoute() {
+  const parts = location.hash.slice(1).split('/').filter(Boolean);
+  return parts;
+}
+
+function stepBar(step) {
+  const labels = ['Land', 'Geschlecht', 'Aroma', 'Stream'];
+  return `
+    <div class="step-bar">
+      ${labels.map((l, i) => `
+        <div class="step-item ${i + 1 <= step ? 'done' : ''} ${i + 1 === step ? 'active' : ''}">
+          <span class="step-num">${i + 1}</span>
+          <span class="step-label">${l}</span>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+function layout(content, { step = 0, back = null, title = 'Gif This Milk' } = {}) {
   document.title = title;
   app.innerHTML = `
-    <div class="app-shell">
-      <header class="topbar">
-        ${back ? `<button class="back-btn" data-back="${esc(back)}" aria-label="Zurück">←</button>` : '<span class="back-spacer"></span>'}
-        <a href="#/" class="logo">🥛 Sortiment</a>
-        <span class="back-spacer"></span>
-      </header>
+    <div class="app-shell ${step === 4 ? 'stream-mode' : ''}">
+      ${step && step < 4 ? stepBar(step) : ''}
+      ${back !== null ? `<header class="topbar"><button class="back-btn" data-back="${esc(back)}">←</button></header>` : ''}
       <main class="main">${content}</main>
-      <footer class="footer">
-        <p>Alle Angaben freiwillig · Demo-Daten · <span class="accent">gif this milk</span></p>
-      </footer>
+      ${step < 4 ? '<footer class="footer"><span class="accent">gif this milk</span></footer>' : ''}
     </div>`;
-
-  app.querySelector('[data-back]')?.addEventListener('click', (e) => {
-    nav(e.target.dataset.back);
-  });
+  app.querySelector('[data-back]')?.addEventListener('click', (e) => nav(e.target.dataset.back));
 }
 
 function renderHome() {
   layout(`
     <section class="hero">
       <p class="eyebrow">Gif This Milk</p>
-      <h1>Unser Sortiment</h1>
-      <p class="lead">Jede Sorte ist einzigartig — zusammengesetzt aus Land, Geschmack und Aroma.</p>
+      <h1>Stell deine Milch zusammen</h1>
+      <p class="lead">Land → Geschlecht → Aroma — dann live im Stream: liken, füllen, trinken.</p>
     </section>
-
-    <section class="concept-grid">
+    <div class="concept-grid">
       ${Object.values(CONCEPT).map((c) => `
         <article class="concept-card">
           <span class="concept-icon">${c.icon}</span>
@@ -63,303 +71,224 @@ function renderHome() {
           <p>${esc(c.text)}</p>
         </article>
       `).join('')}
-    </section>
+    </div>
+    <button class="btn btn-primary" id="start">🌍 Land wählen — Start</button>
+  `, { title: 'Gif This Milk — Start' });
 
-    <section class="cta-block">
-      <h2>So funktioniert's</h2>
-      <ol class="flow-steps">
-        <li><strong>Land wählen</strong> → bestimmt die Sorte</li>
-        <li><strong>Profil wählen</strong> → Geschmack & Aroma</li>
-        <li><strong>Milch pressen</strong> → deine Flasche + Gif</li>
-        <li><strong>Teilen</strong> → TikTok, Story, Stream</li>
-      </ol>
-      <button class="btn btn-primary" id="go-countries">🌍 Los geht's — Länder wählen</button>
-      <a href="#/sammlung" class="link-sammlung">🥛 Meine Milch-Sammlung</a>
-    </section>
-  `, { title: 'Sortiment — Start' });
-
-  document.getElementById('go-countries').addEventListener('click', () => nav('/laender'));
+  document.getElementById('start').addEventListener('click', () => nav('/land'));
 }
 
-function renderCountries() {
+function renderLand() {
   layout(`
     <section class="page-head">
-      <h1>Alle Länder</h1>
-      <p>${COUNTRIES.length} Sorten-Herkünfte · Tippe ein Land für Details</p>
+      <h1>🌍 Dein Land</h1>
+      <p>Bestimmt deine Milch-Sorte</p>
     </section>
-    <div class="country-grid">
-      ${COUNTRIES.map((c) => {
-        const count = getProfilesByCountry(c.code).length;
-        return `
-          <a href="#/land/${c.code}" class="country-card">
-            <span class="country-flag">${c.flag}</span>
-            <div class="country-info">
-              <strong>${esc(c.name)}</strong>
-              <span class="country-sorte">${esc(c.sorte)}</span>
-              <span class="country-meta">${count} Profile · ${esc(c.region)}</span>
-            </div>
-            <span class="country-arrow">→</span>
-          </a>`;
-      }).join('')}
-    </div>
-  `, { back: '/', title: 'Länder — Sortiment' });
-}
-
-function renderCountry(code, genderFilter = 'all') {
-  const country = getCountry(code);
-  if (!country) {
-    renderNotFound();
-    return;
-  }
-
-  const profiles = getProfilesByCountry(code, genderFilter);
-  const tabs = [
-    { id: 'all', label: 'Alle' },
-    { id: 'frauen', label: 'Frauen' },
-    { id: 'maenner', label: 'Männer' },
-    { id: 'divers', label: 'Divers' },
-  ];
-
-  layout(`
-    <section class="country-hero">
-      <span class="country-hero-flag">${country.flag}</span>
-      <div>
-        <h1>${esc(country.name)}</h1>
-        <p class="sorte-badge">Sorte: ${esc(country.sorte)}</p>
-      </div>
-    </section>
-
-    <div class="filter-tabs" role="tablist">
-      ${tabs.map((t) => `
-        <button class="tab ${genderFilter === t.id ? 'active' : ''}" data-filter="${t.id}" role="tab">
-          ${esc(t.label)}
+    <div class="pick-grid">
+      ${COUNTRIES.map((c) => `
+        <button class="pick-card" data-country="${c.code}">
+          <span class="pick-icon">${c.flag}</span>
+          <strong>${esc(c.name)}</strong>
+          <span>${esc(c.sorte)}</span>
         </button>
       `).join('')}
     </div>
+  `, { step: 1, back: '/', title: 'Land wählen' });
 
-    <p class="result-count">${profiles.length} ${profiles.length === 1 ? 'Profil' : 'Profile'}</p>
+  app.querySelectorAll('[data-country]').forEach((btn) => {
+    btn.addEventListener('click', () => nav(`/geschlecht/${btn.dataset.country}`));
+  });
+}
 
-    <div class="profile-grid">
-      ${profiles.length ? profiles.map((p) => `
-        <a href="#/profil/${p.id}" class="profile-card">
-          <div class="profile-avatar">${p.gender === 'Frau' ? '👩' : p.gender === 'Mann' ? '👨' : '🧑'}</div>
-          <div class="profile-summary">
-            <strong>${esc(p.name)}</strong>
-            <span>${p.age} Jahre · ${esc(p.gender)}</span>
-            <span class="profile-aroma">${esc(p.aroma)}</span>
-          </div>
-          <span class="profile-arrow">→</span>
-        </a>
-      `).join('') : '<p class="empty">Keine Profile in dieser Kategorie.</p>'}
+function renderGender(countryCode) {
+  const country = getCountry(countryCode);
+  if (!country) return renderHome();
+
+  layout(`
+    <section class="page-head">
+      <h1>⚧️ Dein Geschlecht</h1>
+      <p>${country.flag} ${esc(country.name)} · bestimmt den Geschmack</p>
+    </section>
+    <div class="pick-grid pick-grid-sm">
+      ${GENDER_OPTIONS.map((g) => `
+        <button class="pick-card" data-gender="${g.id}">
+          <span class="pick-icon">${g.icon}</span>
+          <strong>${esc(g.label)}</strong>
+          <span>${esc(g.desc)}</span>
+        </button>
+      `).join('')}
     </div>
-  `, { back: '/laender', title: `${country.name} — Sortiment` });
+  `, { step: 2, back: '/land', title: 'Geschlecht wählen' });
 
-  app.querySelectorAll('[data-filter]').forEach((btn) => {
+  app.querySelectorAll('[data-gender]').forEach((btn) => {
+    btn.addEventListener('click', () => nav(`/aroma/${countryCode}/${btn.dataset.gender}`));
+  });
+}
+
+function renderAroma(countryCode, genderKey) {
+  const country = getCountry(countryCode);
+  const gender = getGenderOption(genderKey);
+  if (!country || !gender) return renderHome();
+
+  const options = getSexualityOptions(countryCode, genderKey);
+  if (!options.length) {
+    layout(`<p class="empty">Keine Sorte für diese Kombination.</p>`, { step: 3, back: `/geschlecht/${countryCode}` });
+    return;
+  }
+
+  layout(`
+    <section class="page-head">
+      <h1>🌈 Deine Sexualität</h1>
+      <p>${country.flag} · ${esc(gender.label)} · bestimmt das Aroma</p>
+    </section>
+    <div class="pick-list">
+      ${options.map((p) => `
+        <button class="pick-row" data-sexuality="${esc(p.sexuality)}">
+          <div>
+            <strong>${esc(p.sexuality)}</strong>
+            <span>Aroma: ${esc(p.aroma)}</span>
+            <span>Geschmack: ${esc(p.taste)}</span>
+          </div>
+          <span class="arrow">→</span>
+        </button>
+      `).join('')}
+    </div>
+  `, { step: 3, back: `/geschlecht/${countryCode}`, title: 'Aroma wählen' });
+
+  app.querySelectorAll('[data-sexuality]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      nav(`/land/${code}/${btn.dataset.filter}`);
+      const profile = findProfile(countryCode, genderKey, btn.dataset.sexuality);
+      if (!profile) return;
+      saveSelection({
+        country: countryCode,
+        gender: genderKey,
+        sexuality: profile.sexuality,
+        profileId: profile.id,
+      });
+      resetStreamState();
+      nav('/stream');
     });
   });
 }
 
-function renderProfile(id) {
-  const profile = getProfile(id);
-  if (!profile) {
-    renderNotFound();
-    return;
-  }
-  const country = getCountry(profile.country);
-
-  layout(`
-    <article class="profile-detail">
-      <div class="profile-detail-header">
-        <div class="profile-avatar large">${profile.gender === 'Frau' ? '👩' : profile.gender === 'Mann' ? '👨' : '🧑'}</div>
-        <div>
-          <h1>${esc(profile.name)}</h1>
-          <p class="profile-age">${profile.age} Jahre</p>
-        </div>
-      </div>
-
-      <div class="detail-grid">
-        <div class="detail-item">
-          <span class="detail-label">🌍 Land / Sorte</span>
-          <strong>${country.flag} ${esc(country.name)}</strong>
-          <span>${esc(country.sorte)}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">⚧️ Geschlecht / Geschmack</span>
-          <strong>${esc(profile.gender)}</strong>
-          <span>${esc(profile.taste)}</span>
-        </div>
-        <div class="detail-item">
-          <span class="detail-label">🌈 Sexualität / Aroma</span>
-          <strong>${esc(profile.sexuality)}</strong>
-          <span>${esc(profile.aroma)}</span>
-        </div>
-      </div>
-
-      <section class="bio-box">
-        <h2>Bio</h2>
-        <p>${esc(profile.bio)}</p>
-      </section>
-
-      <section class="action-box">
-        <h2>Was passiert als Nächstes?</h2>
-        <p>Du wählst diese Sorte — wir pressen deine personalisierte Milch-Flasche und erstellen ein sharebares Gif.</p>
-        <button class="btn btn-primary" id="choose-milk">🥛 Diese Sorte wählen — gif this milk</button>
-      </section>
-
-      <button class="btn btn-secondary" id="back-country">← Zurück zu ${esc(country.name)}</button>
-    </article>
-  `, { back: `/land/${profile.country}`, title: `${profile.name} — Sortiment` });
-
-  document.getElementById('back-country').addEventListener('click', () => {
-    nav(`/land/${profile.country}`);
-  });
-
-  document.getElementById('choose-milk').addEventListener('click', () => {
-    nav(`/milch/${profile.id}`);
-  });
-}
-
-function renderMilch(id) {
-  const profile = getProfile(id);
-  if (!profile) {
-    renderNotFound();
+function renderStream() {
+  const sel = getSelection();
+  if (!sel?.profileId) {
+    nav('/');
     return;
   }
 
-  const country = getCountry(profile.country);
-  const product = saveToCollection(id);
-  const overlayUrl = new URL('../overlay.html', window.location.href).href;
+  const profile = findProfile(sel.country, sel.gender, sel.sexuality);
+  const country = getCountry(sel.country);
+  if (!profile || !country) {
+    nav('/');
+    return;
+  }
 
-  layout(`
-    <section class="result-hero">
-      <p class="eyebrow">Fertig gepresst</p>
-      <h1>Deine Milch ist da!</h1>
-      <p class="lead">Aus ${esc(country.name)} · ${esc(profile.taste)} · ${esc(profile.aroma)}</p>
-    </section>
+  let state = getStreamState();
 
-    <div class="bottle-result" id="bottle-result">
-      <div class="bottle-visual">
-        <div class="bottle-cap"></div>
-        <div class="bottle-body">
-          <div class="bottle-label">
-            <span class="bottle-flag">${country.flag}</span>
-            <strong>${esc(product.label)}</strong>
-            <span>${esc(country.sorte)}</span>
-            <span class="bottle-notes">${esc(profile.taste)}</span>
-            <span class="bottle-notes">${esc(profile.aroma)}</span>
-            <span class="bottle-slogan">gif this milk</span>
-          </div>
-          <div class="bottle-liquid-fill"></div>
+  function mount() {
+    layout(`
+      <div class="stream-overlay">
+        <header class="stream-header">
+          <span class="live-badge">● LIVE</span>
+          <h1>Gif This Milk</h1>
+          <p class="stream-slogan">gif this milk</p>
+        </header>
+
+        <div class="stream-info">
+          <span>${country.flag} ${esc(country.sorte)}</span>
+          <span>⚧️ ${esc(profile.taste)}</span>
+          <span>🌈 ${esc(profile.aroma)}</span>
         </div>
-      </div>
-      <div class="pour-effect">🥛</div>
-    </div>
 
-    <section class="result-actions">
-      <h2>Was du jetzt machen kannst</h2>
-      <div class="action-list">
-        <button class="action-card" id="copy-share">
-          <span>📋</span>
-          <div>
-            <strong>Link kopieren</strong>
-            <span>Für TikTok-Bio oder Story</span>
+        <div class="machine-mini">
+          <div class="machine-mini-body">
+            <div class="machine-mini-tank"></div>
+            <div class="machine-mini-nozzle"></div>
           </div>
-        </button>
-        <a class="action-card" href="${esc(overlayUrl)}" target="_blank" rel="noopener">
-          <span>📺</span>
-          <div>
-            <strong>Im Stream zeigen</strong>
-            <span>OBS Overlay öffnen</span>
+          <div class="stream-pour ${state.pouring ? 'active' : ''}" id="pour-line"></div>
+        </div>
+
+        <div class="glass-wrap">
+          <div class="glass" id="glass">
+            <div class="glass-milk" id="glass-milk" style="height:${state.fill}%"></div>
+            <div class="glass-shine"></div>
           </div>
-        </a>
-        <button class="action-card" id="go-sammlung">
-          <span>🗂️</span>
-          <div>
-            <strong>Zur Sammlung</strong>
-            <span>Alle deine Sorten</span>
-          </div>
-        </button>
+          <p class="glass-label" id="glass-label">${state.fill >= 100 ? 'Voll!' : `${Math.round(state.fill)}% voll`}</p>
+        </div>
+
+        <div class="stream-toast ${state.toast ? 'show' : ''}" id="stream-toast">${esc(state.toast || '')}</div>
+
+        <div class="stream-actions">
+          <button class="like-btn" id="like-btn" ${state.fill >= 100 ? 'disabled' : ''}>
+            ❤️ Like <span id="like-count">${state.likes}</span>
+          </button>
+          <button class="drink-btn ${state.fill >= 100 ? 'show' : ''}" id="drink-btn">
+            🥤 Trinken
+          </button>
+        </div>
+
+        <p class="stream-hint" id="stream-hint">
+          ${state.fill >= 100 ? 'Glas ist voll — trink deine Milch!' : 'Like = Milch ins Glas. Bei 100% trinken.'}
+        </p>
+
+        <button class="btn-link" id="restart">↺ Neu zusammenstellen</button>
       </div>
-    </section>
+    `, { step: 4, title: 'Live Stream' });
 
-    <button class="btn btn-secondary" id="pick-another">← Andere Sorte wählen</button>
-  `, { back: `/profil/${id}`, title: `${product.label} — Fertig` });
+    document.getElementById('like-btn')?.addEventListener('click', onLike);
+    document.getElementById('drink-btn')?.addEventListener('click', onDrink);
+    document.getElementById('restart')?.addEventListener('click', () => {
+      clearSelection();
+      resetStreamState();
+      nav('/');
+    });
+  }
 
-  document.getElementById('copy-share').addEventListener('click', async () => {
-    const text = `🥛 ${product.label}\n${country.sorte} · ${profile.taste} · ${profile.aroma}\ngif this milk\n${location.href}`;
-    try {
-      await navigator.clipboard.writeText(text);
-      const btn = document.getElementById('copy-share');
-      btn.querySelector('strong').textContent = 'Kopiert! ✓';
-    } catch {
-      alert(text);
-    }
-  });
+  function onLike() {
+    if (state.fill >= 100) return;
+    state.likes += 1;
+    const boost = 8 + Math.floor(Math.random() * 10);
+    state.fill = Math.min(100, state.fill + boost);
+    state.pouring = true;
+    state.toast = `+${boost}% Milch! ❤️`;
+    saveStreamState(state);
+    mount();
+    setTimeout(() => {
+      state.pouring = false;
+      if (state.fill >= 100) state.toast = '🥛 Glas voll — jetzt trinken!';
+      saveStreamState(state);
+      mount();
+    }, 700);
+  }
 
-  document.getElementById('go-sammlung').addEventListener('click', () => nav('/sammlung'));
-  document.getElementById('pick-another').addEventListener('click', () => nav('/laender'));
+  function onDrink() {
+    if (state.fill < 100) return;
+    state.drunk += 1;
+    state.toast = 'Schluck schluck… gif this milk! 🥛';
+    state.pouring = false;
+    const glass = document.getElementById('glass');
+    glass?.classList.add('drinking');
+    setTimeout(() => {
+      state.fill = 0;
+      state.toast = `Leer! ${state.drunk}× getrunken — keep liking!`;
+      saveStreamState(state);
+      mount();
+    }, 1400);
+  }
 
-  setTimeout(() => {
-    document.getElementById('bottle-result')?.classList.add('animated');
-  }, 100);
-}
-
-function renderSammlung() {
-  const items = getCollection();
-
-  layout(`
-    <section class="page-head">
-      <h1>Meine Milch-Sammlung</h1>
-      <p>${items.length} Sorten gepresst</p>
-    </section>
-
-    ${items.length ? `
-      <div class="collection-list">
-        ${items.map((item) => `
-          <a href="#/milch/${esc(item.id)}" class="collection-item">
-            <span class="collection-emoji">🥛</span>
-            <div>
-              <strong>${esc(item.label)}</strong>
-              <span>${esc(item.sorte)} · ${esc(item.aroma)}</span>
-            </div>
-            <span>→</span>
-          </a>
-        `).join('')}
-      </div>
-    ` : `
-      <section class="empty-page">
-        <p>Noch keine Milch gepresst.</p>
-        <button class="btn btn-primary" id="start-pick">Sorte wählen</button>
-      </section>
-    `}
-  `, { back: '/', title: 'Meine Sammlung' });
-
-  document.getElementById('start-pick')?.addEventListener('click', () => nav('/laender'));
-}
-
-function renderNotFound() {
-  layout(`
-    <section class="empty-page">
-      <h1>Nicht gefunden</h1>
-      <p>Diese Seite existiert nicht.</p>
-      <button class="btn btn-primary" id="go-home">Zur Startseite</button>
-    </section>
-  `, { title: '404' });
-  document.getElementById('go-home').addEventListener('click', () => nav('/'));
+  mount();
 }
 
 function router() {
-  const { parts } = parseRoute();
-
-  if (parts.length === 0) return renderHome();
-  if (parts[0] === 'laender') return renderCountries();
-  if (parts[0] === 'land' && parts[1]) return renderCountry(parts[1], parts[2] || 'all');
-  if (parts[0] === 'profil' && parts[1]) return renderProfile(parts[1]);
-  if (parts[0] === 'milch' && parts[1]) return renderMilch(parts[1]);
-  if (parts[0] === 'sammlung') return renderSammlung();
-  return renderNotFound();
+  const p = parseRoute();
+  if (!p.length) return renderHome();
+  if (p[0] === 'land') return renderLand();
+  if (p[0] === 'geschlecht' && p[1]) return renderGender(p[1]);
+  if (p[0] === 'aroma' && p[1] && p[2]) return renderAroma(p[1], p[2]);
+  if (p[0] === 'stream') return renderStream();
+  return renderHome();
 }
 
 window.addEventListener('hashchange', router);
