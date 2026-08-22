@@ -896,7 +896,42 @@ body {
   font-weight: 600;
 }
 
-/* Chat help & registry */
+.privacy-box {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #ecfdf5, #f0fdf4);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+}
+
+.privacy-icon { font-size: 1.4rem; flex-shrink: 0; }
+
+.privacy-box strong {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #047857;
+  margin-bottom: 4px;
+}
+
+.privacy-box p {
+  font-size: 0.72rem;
+  color: #065f46;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.private-badge {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  font-weight: 800 !important;
+}
+
+.private-tags { position: relative; }
+
 .chat-help {
   background: var(--surface);
   border-radius: var(--radius-md);

@@ -20,17 +20,23 @@ TikTok Live Milch-Automat — interaktiv, meme-tauglich, OBS-ready.
 
 ## Sortiment + TikTok Live
 
-1. Milch zusammenstellen → **Spiel starten**
-2. **Likes** im Stream füllen das Glas für **alle** Zuschauer gleichzeitig
-3. Im Chat **`trinken`** schreiben → Glas wird geleert (nur wenn 100% voll)
+**Privat im Browser:** Land, Geschlecht, Sexualität — nur localStorage, nie TikTok-Chat.
+
+**Öffentlich via TikTok:**
+- **Like** → Glas füllt sich für alle
+- Chat **`trinken`** → Glas leeren (wenn voll)
+
+### Demo testen
+
+- **GitHub Pages:** https://martin20231.github.io/gifthismilk/sortiment/?v=13 — reine Demo, alles lokal
+- **Lokal mit Server:** `npm start` → http://localhost:3847/sortiment/?demo=1
 
 ```bash
 npm install
+npm start
+# Optional TikTok:
 TIKTOK_USERNAME=dein_username npm start
 ```
-
-- **Sortiment:** http://localhost:3847/sortiment/
-- Zuschauer öffnen dieselbe URL (mit `?server=https://dein-server.de` wenn gehostet)
 
 ## Lokal mit TikTok
 

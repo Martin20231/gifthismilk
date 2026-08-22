@@ -1,12 +1,18 @@
 /**
- * TikTok Live stream client — syncs glass state for all viewers via Socket.io.
+ * TikTok Live stream client — shared glass only (no personal data).
  */
 
 let socket = null;
 let connected = false;
 let listeners = new Set();
 
+function isDemoForced() {
+  return new URLSearchParams(location.search).get('demo') === '1';
+}
+
 function resolveServerUrl() {
+  if (isDemoForced()) return null;
+
   const params = new URLSearchParams(location.search);
   if (params.get('server')) return params.get('server').replace(/\/$/, '');
 
@@ -21,11 +27,6 @@ function resolveServerUrl() {
 
 export function isLiveMode() {
   return !!resolveServerUrl();
-}
-
-export function getConnectionStatus() {
-  if (!resolveServerUrl()) return 'offline';
-  return connected ? 'live' : 'connecting';
 }
 
 export function onStreamState(fn) {
@@ -45,7 +46,6 @@ export function connectStream() {
   }
 
   if (typeof io === 'undefined') {
-    console.warn('Socket.io client not loaded');
     notify({ mode: 'demo' });
     return null;
   }
@@ -71,43 +71,23 @@ export function connectStream() {
   return socket;
 }
 
-export function disconnectStream() {
-  if (socket) {
-    socket.disconnect();
-    socket = null;
-  }
-  connected = false;
-}
-
-export function startLiveSession(profile) {
+export function startLiveSession() {
   if (!socket?.connected) return;
-  socket.emit('sortiment:start', profile);
+  socket.emit('sortiment:start');
 }
 
-export function sendChatCommand(user, comment) {
-  if (!socket?.connected) return false;
-  socket.emit('sortiment:chat', { user, comment });
-  return true;
-}
-
-export function registerProfile(user, country, gender, sexuality) {
-  if (!socket?.connected) return false;
-  socket.emit('sortiment:register', { user, country, gender, sexuality });
-  return true;
-}
-
-export function demoLike(user = 'Demo') {
+export function sendLike(user = 'Demo') {
   if (socket?.connected) {
     socket.emit('sortiment:like', { user });
-    return;
+    return true;
   }
-  notify({ mode: 'demo-like', user });
+  return false;
 }
 
-export function demoDrink(user = 'Demo') {
+export function sendDrink(user = 'Demo') {
   if (socket?.connected) {
     socket.emit('sortiment:drink', { user });
-    return;
+    return true;
   }
-  notify({ mode: 'demo-drink', user });
+  return false;
 }

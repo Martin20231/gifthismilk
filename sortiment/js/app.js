@@ -3,15 +3,17 @@ import {
   GENDER_OPTIONS,
   getCountry,
   getSexualityOptions,
+  getSelection,
   resolveMilkProfile,
+  saveSelection,
 } from './data.js';
 import {
   connectStream,
   startLiveSession,
   onStreamState,
   isLiveMode,
-  sendChatCommand,
-  registerProfile,
+  sendLike,
+  sendDrink,
 } from './stream-client.js';
 
 const app = document.getElementById('app');
@@ -27,10 +29,11 @@ const SEXUALITY_EMOJI = {
   Queer: '✨',
 };
 
+const saved = getSelection();
 const selection = {
-  country: null,
-  gender: null,
-  sexuality: null,
+  country: saved?.country ?? null,
+  gender: saved?.gender ?? null,
+  sexuality: saved?.sexuality ?? null,
 };
 
 let gameActive = false;
@@ -43,14 +46,16 @@ let streamState = {
   toast: '',
   lastActor: null,
 };
-let registrations = [];
-let registryToast = '';
 let streamMode = isLiveMode() ? 'connecting' : 'demo';
 
 function esc(str) {
   const d = document.createElement('div');
   d.textContent = str ?? '';
   return d.innerHTML;
+}
+
+function persistSelection() {
+  saveSelection({ ...selection });
 }
 
 function isReady() {
@@ -81,29 +86,19 @@ function renderSteps() {
   }).join('');
 }
 
-function liveStatusHtml() {
-  if (streamMode === 'live') return '<span class="conn-badge conn-live">🔴 TikTok Live verbunden</span>';
-  if (streamMode === 'connecting') return '<span class="conn-badge conn-wait">⏳ Verbinde…</span>';
-  return '<span class="conn-badge conn-demo">📱 Demo — Server für TikTok Live nötig</span>';
-}
-
-function renderRegistrations() {
-  if (!registrations.length) {
-    return '<p class="reg-empty">Noch niemand registriert — wähle im Chat oder unten.</p>';
+function statusHtml() {
+  if (streamMode === 'live') {
+    return '<span class="conn-badge conn-live">🔴 Live — nur Likes & trinken aus TikTok</span>';
   }
-  return registrations.slice(0, 12).map((r) => `
-    <div class="reg-item">
-      <span class="reg-user">@${esc(r.user)}</span>
-      <span class="reg-milk">${r.profile.flag} ${esc(r.profile.sorte)}</span>
-      <span class="reg-meta">${esc(r.profile.gender)} · ${esc(r.profile.sexuality)}</span>
-    </div>
-  `).join('');
+  if (streamMode === 'connecting') {
+    return '<span class="conn-badge conn-wait">⏳ Verbinde…</span>';
+  }
+  return '<span class="conn-badge conn-demo">🧪 Demo-Modus — teste Like & trinken unten</span>';
 }
 
 function render() {
   const profile = getProfile();
   const country = selection.country ? getCountry(selection.country) : null;
-  const isLive = streamMode === 'live';
 
   app.innerHTML = `
     <div class="shell ${gameActive ? 'is-game' : ''}">
@@ -120,19 +115,16 @@ function render() {
         <div class="hero">
           <div class="hero-pill">🔴 TikTok Live</div>
           <h1>Mix deine<br><em>Milch</em></h1>
-          <p class="hero-sub">Frei wählen oder im Chat registrieren</p>
+          <p class="hero-sub">Privat hier im Browser wählen · Live nur Like & trinken</p>
           <div class="step-track">${renderSteps()}</div>
         </div>
 
-        <div class="chat-help">
-          <h3>💬 TikTok Chat-Befehle</h3>
-          <div class="chat-cmds">
-            <code>land de</code>
-            <code>geschlecht frau</code>
-            <code>sexualität heterosexuell</code>
-            <code>trinken</code>
+        <div class="privacy-box">
+          <span class="privacy-icon">🔒</span>
+          <div>
+            <strong>Deine Daten bleiben privat</strong>
+            <p>Land, Geschlecht & Sexualität werden nur auf deinem Gerät gespeichert — nicht im TikTok-Chat.</p>
           </div>
-          <p class="chat-help-note">Reihenfolge egal · bei 3/3 bist du registriert</p>
         </div>
 
         <div class="bento">
@@ -187,7 +179,7 @@ function render() {
           <div class="milk-card">
             <div class="milk-card-glow"></div>
             <div class="milk-card-inner">
-              <span class="milk-card-label">Dein Mix 🎉</span>
+              <span class="milk-card-label">Dein Mix — nur lokal 🔒</span>
               <div class="milk-card-title">${country.flag} ${esc(country.sorte)}</div>
               <div class="milk-card-tags">
                 <span>⚧️ ${esc(profile.taste)}</span>
@@ -197,19 +189,13 @@ function render() {
           </div>
         ` : ''}
 
-        <div class="reg-panel">
-          <h3>✅ Registriert im Stream</h3>
-          ${registryToast ? `<div class="reg-toast show">${esc(registryToast)}</div>` : ''}
-          <div class="reg-list">${renderRegistrations()}</div>
-        </div>
-
-        <div class="chat-demo">
-          <p class="chat-demo-label">Chat testen (Demo)</p>
-          <div class="chat-demo-row">
-            <input type="text" id="demo-user" placeholder="Username" value="Zuschauer1" />
-            <input type="text" id="demo-chat" placeholder="land de" />
-            <button type="button" id="demo-send">→</button>
+        <div class="chat-help">
+          <h3>💬 TikTok Live (öffentlich)</h3>
+          <div class="chat-cmds">
+            <code>❤️ Like</code>
+            <code>trinken</code>
           </div>
+          <p class="chat-help-note">Nur das Glas steuern — keine persönlichen Daten im Chat.</p>
         </div>
 
         <div class="fab-wrap">
@@ -226,22 +212,23 @@ function render() {
           <header class="live-top">
             <button type="button" class="live-back" id="back-setup">← Mix</button>
             <div class="live-brand">gif this milk</div>
-            <span class="live-dot">LIVE</span>
+            <span class="live-dot">${streamMode === 'demo' ? 'DEMO' : 'LIVE'}</span>
           </header>
 
-          ${liveStatusHtml()}
+          ${statusHtml()}
 
           ${profile && country ? `
-            <div class="live-tags">
+            <div class="live-tags private-tags">
               <span>${country.flag} ${esc(country.sorte)}</span>
               <span>⚧️ ${esc(profile.taste)}</span>
               <span>🌈 ${esc(profile.aroma)}</span>
+              <span class="private-badge">🔒 nur du</span>
             </div>
           ` : ''}
 
           <div class="live-rules">
-            <div class="rule"><span>❤️</span> Like = Milch</div>
-            <div class="rule"><span>💬</span> <strong>trinken</strong></div>
+            <div class="rule"><span>❤️</span> Like füllt Glas</div>
+            <div class="rule"><span>💬</span> Chat: <strong>trinken</strong></div>
           </div>
 
           <div class="live-stage">
@@ -256,27 +243,20 @@ function render() {
               </div>
               <div class="fill-bar"><div class="fill-bar-inner" style="width:${streamState.fill}%"></div></div>
               <p class="fill-text">${streamState.fill >= 100 ? '🥛 Voll — trinken!' : `${Math.round(streamState.fill)}% im Glas`}</p>
-              <p class="fill-meta">❤️ ${streamState.likes} · 🥤 ${streamState.drunk}× · 👥 ${registrations.length} registriert</p>
+              <p class="fill-meta">❤️ ${streamState.likes} Likes · 🥤 ${streamState.drunk}× getrunken</p>
             </div>
           </div>
 
           <div class="live-toast ${streamState.toast ? 'show' : ''}">${esc(streamState.toast || '')}</div>
 
-          ${registryToast ? `<div class="reg-toast show">${esc(registryToast)}</div>` : ''}
-
-          ${isLive ? `
-            <p class="live-hint live-hint-main">Live via TikTok — Likes & Chat steuern das Glas</p>
-          ` : `
-            <div class="live-actions">
-              <button type="button" class="btn-like" id="demo-like">❤️ Demo-Like</button>
-              <button type="button" class="btn-drink ${streamState.fill >= 100 ? 'show' : ''}" id="demo-drink">💬 trinken</button>
-            </div>
-          `}
-
-          <div class="reg-panel reg-panel-compact">
-            <h3>Registriert</h3>
-            <div class="reg-list">${renderRegistrations()}</div>
+          <div class="live-actions">
+            <button type="button" class="btn-like" id="demo-like">❤️ Demo-Like</button>
+            <button type="button" class="btn-drink ${streamState.fill >= 100 ? 'show' : ''}" id="demo-drink">💬 Demo: trinken</button>
           </div>
+
+          <p class="live-hint">${streamMode === 'live'
+    ? 'Live: TikTok-Likes + Chat „trinken“ — Demo-Buttons zum Testen'
+    : 'Demo-Modus — teste Like & trinken. Auswahl bleibt auf deinem Gerät.'}</p>
         </div>
       </section>
     </div>
@@ -298,8 +278,8 @@ function applyStreamUpdate(data) {
     return;
   }
 
-  if (data.connected !== undefined || data.fill !== undefined || data.registrations) {
-    streamMode = data.connected === false ? 'connecting' : 'live';
+  if (data.connected !== undefined || data.fill !== undefined) {
+    streamMode = 'live';
     if (data.fill !== undefined) {
       streamState = {
         fill: data.fill,
@@ -311,11 +291,6 @@ function applyStreamUpdate(data) {
         lastActor: data.lastActor ?? null,
       };
     }
-    if (data.registrations) registrations = data.registrations;
-    if (data.lastRegistryEvent?.message) {
-      registryToast = data.lastRegistryEvent.message;
-      setTimeout(() => { registryToast = ''; render(); }, 5000);
-    }
     render();
   }
 }
@@ -324,6 +299,7 @@ function bindEvents() {
   document.querySelectorAll('[data-country]').forEach((btn) => {
     btn.addEventListener('click', () => {
       selection.country = btn.dataset.country;
+      persistSelection();
       render();
     });
   });
@@ -331,6 +307,7 @@ function bindEvents() {
   document.querySelectorAll('[data-gender]').forEach((btn) => {
     btn.addEventListener('click', () => {
       selection.gender = btn.dataset.gender;
+      persistSelection();
       render();
     });
   });
@@ -338,23 +315,17 @@ function bindEvents() {
   document.querySelectorAll('[data-sexuality]').forEach((btn) => {
     btn.addEventListener('click', () => {
       selection.sexuality = btn.dataset.sexuality;
+      persistSelection();
       render();
     });
   });
 
   document.getElementById('start-game')?.addEventListener('click', () => {
     if (!isReady()) return;
-    const profile = getProfile();
-    const country = getCountry(selection.country);
+    persistSelection();
     gameActive = true;
     streamState = { fill: 0, likes: 0, drunk: 0, pouring: false, drinking: false, toast: '', lastActor: null };
-    startLiveSession({
-      sorte: country?.sorte,
-      flag: country?.flag,
-      taste: profile?.taste,
-      aroma: profile?.aroma,
-    });
-    registerProfile('Streamer', selection.country, selection.gender, selection.sexuality);
+    startLiveSession();
     render();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
@@ -365,27 +336,12 @@ function bindEvents() {
     document.getElementById('setup')?.scrollIntoView({ behavior: 'smooth' });
   });
 
-  document.getElementById('demo-like')?.addEventListener('click', () => handleLocalLike('Demo'));
-  document.getElementById('demo-drink')?.addEventListener('click', () => handleLocalDrink('Demo'));
-
-  document.getElementById('demo-send')?.addEventListener('click', () => {
-    const user = document.getElementById('demo-user')?.value?.trim() || 'Demo';
-    const comment = document.getElementById('demo-chat')?.value?.trim();
-    if (!comment) return;
-    if (sendChatCommand(user, comment)) return;
-    fetch('http://localhost:3847/api/sortiment/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user, comment }),
-    }).catch(() => {
-      registryToast = 'Server nicht erreichbar — npm start';
-      render();
-    });
-    document.getElementById('demo-chat').value = '';
+  document.getElementById('demo-like')?.addEventListener('click', () => {
+    if (!sendLike('Demo')) handleLocalLike('Demo');
   });
 
-  document.getElementById('demo-chat')?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') document.getElementById('demo-send')?.click();
+  document.getElementById('demo-drink')?.addEventListener('click', () => {
+    if (!sendDrink('Demo')) handleLocalDrink('Demo');
   });
 }
 
@@ -408,12 +364,12 @@ function handleLocalDrink(user) {
   if (streamState.fill < 100 || streamState.drinking) return;
   streamState.drunk += 1;
   streamState.drinking = true;
-  streamState.toast = `🥤 ${user} trinkt!`;
+  streamState.toast = `🥤 ${user} trinkt! gif this milk!`;
   render();
   setTimeout(() => {
     streamState.fill = 0;
     streamState.drinking = false;
-    streamState.toast = `${streamState.drunk}× getrunken`;
+    streamState.toast = `${streamState.drunk}× getrunken — weiter liken!`;
     render();
   }, 1400);
 }
