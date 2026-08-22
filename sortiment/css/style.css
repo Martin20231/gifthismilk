@@ -469,6 +469,7 @@ body {
 }
 
 .page.game-active .setup { display: none; }
+.page.game-active .top-bar { display: none; }
 .page.game-active .game { display: block; }
 .page.game-active { padding-bottom: calc(40px + var(--safe-bottom)); }
 
