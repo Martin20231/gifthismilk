@@ -1,14 +1,18 @@
-/* Gif This Milk — v14 */
+/* Gif This Milk — v15 */
 :root {
-  --bg: #faf8ff;
+  --bg: #fff9fb;
   --card: #ffffff;
   --ink: #12101a;
   --muted: #6b6578;
   --line: rgba(18, 16, 26, 0.08);
-  --pink: #ff2d78;
-  --pink-bg: #fff0f6;
-  --violet: #7c3aed;
-  --violet-bg: #f3eeff;
+  --pink: #ffc5d3;
+  --pink-rgb: 255, 197, 211;
+  --pink-bg: #fff5f8;
+  --pink-soft: #ffe0e9;
+  --pink-strong: #e895a8;
+  --pink-deep: #d97a92;
+  --violet: #e895a8;
+  --violet-bg: #fff0f4;
   --mint: #059669;
   --mint-bg: #ecfdf5;
   --cyan: #0891b2;
@@ -32,8 +36,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 
 .bg-blobs { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
 .blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.45; animation: float 16s ease-in-out infinite; }
-.blob-1 { width: 340px; height: 340px; background: #ffc2dd; top: -100px; left: -80px; }
-.blob-2 { width: 300px; height: 300px; background: #ddd6fe; top: 40%; right: -100px; animation-delay: -5s; }
+.blob-1 { width: 340px; height: 340px; background: #ffc5d3; top: -100px; left: -80px; }
+.blob-2 { width: 300px; height: 300px; background: #ffe0e9; top: 40%; right: -100px; animation-delay: -5s; }
 .blob-3 { width: 280px; height: 280px; background: #a7f3d0; bottom: 0; left: 5%; animation-delay: -10s; }
 @keyframes float { 50% { transform: translate(10px, -12px) scale(1.04); } }
 
@@ -62,7 +66,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
   justify-content: space-between;
   gap: 12px;
   padding: 14px 18px;
-  background: rgba(250, 248, 255, 0.88);
+  background: rgba(255, 249, 251, 0.92);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--line);
 }
@@ -70,9 +74,9 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .nav-brand { display: flex; align-items: center; gap: 10px; }
 .nav-logo {
   width: 42px; height: 42px; border-radius: 14px;
-  background: linear-gradient(135deg, var(--pink), var(--violet));
+  background: linear-gradient(135deg, var(--pink), var(--pink-strong));
   display: grid; place-items: center; font-size: 1.25rem;
-  box-shadow: 0 4px 16px rgba(255, 45, 120, 0.25);
+  box-shadow: 0 4px 16px rgba(var(--pink-rgb), 0.45);
 }
 .nav-brand strong { display: block; font-family: var(--display); font-size: 0.95rem; text-transform: lowercase; letter-spacing: -0.02em; }
 .nav-brand small { font-size: 0.65rem; color: var(--muted); font-weight: 600; }
@@ -80,7 +84,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .nav-mode {
   font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em;
   padding: 6px 10px; border-radius: 999px;
-  background: #ff0050; color: white;
+  background: var(--pink-strong); color: white;
 }
 
 .progress-wrap { flex: 1; max-width: 180px; }
@@ -91,7 +95,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .progress-bar { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; }
 .progress-fill {
   height: 100%; border-radius: 999px;
-  background: linear-gradient(90deg, var(--pink), var(--violet));
+  background: linear-gradient(90deg, var(--pink), var(--pink-strong));
   transition: width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
 }
 
@@ -101,7 +105,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .tag {
   display: inline-block; padding: 5px 12px; border-radius: 999px;
   background: var(--card); border: 1px solid var(--line);
-  font-size: 0.65rem; font-weight: 700; color: var(--pink); margin-bottom: 12px;
+  font-size: 0.65rem; font-weight: 700; color: var(--pink-strong); margin-bottom: 12px;
 }
 .hero h1 {
   font-family: var(--display); font-size: clamp(2rem, 8vw, 2.75rem);
@@ -109,7 +113,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 }
 .hero h1 em {
   font-style: normal;
-  background: linear-gradient(120deg, var(--pink), var(--violet));
+  background: linear-gradient(120deg, var(--pink-strong), var(--pink-deep));
   -webkit-background-clip: text; background-clip: text; color: transparent;
 }
 .hero .sub { font-size: 0.88rem; color: var(--muted); line-height: 1.5; }
@@ -125,8 +129,8 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .info-card p { color: var(--muted); font-weight: 600; }
 .info-card.privacy { background: var(--mint-bg); border: 1px solid rgba(5, 150, 105, 0.15); }
 .info-card.privacy strong { color: var(--mint); }
-.info-card.live { background: var(--pink-bg); border: 1px solid rgba(255, 45, 120, 0.12); }
-.info-card.live strong { color: var(--pink); }
+.info-card.live { background: var(--pink-bg); border: 1px solid rgba(var(--pink-rgb), 0.35); }
+.info-card.live strong { color: var(--pink-strong); }
 .info-card b { color: var(--ink); }
 
 /* Selectors */
@@ -137,10 +141,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
   box-shadow: var(--shadow); border: 2px solid transparent;
   transition: border-color 0.25s, box-shadow 0.25s;
 }
-.sel-card.done { border-color: rgba(255, 45, 120, 0.2); box-shadow: var(--shadow), 0 0 0 3px rgba(255, 45, 120, 0.05); }
+.sel-card.done { border-color: rgba(var(--pink-rgb), 0.55); box-shadow: var(--shadow), 0 0 0 3px rgba(var(--pink-rgb), 0.12); }
 .sel-land { background: linear-gradient(180deg, #fff 0%, var(--peach-bg) 100%); }
 .sel-gender { background: linear-gradient(180deg, #fff 0%, var(--cyan-bg) 100%); }
-.sel-aroma { background: linear-gradient(180deg, #fff 0%, var(--violet-bg) 100%); }
+.sel-aroma { background: linear-gradient(180deg, #fff 0%, var(--pink-bg) 100%); }
 
 .sel-head {
   display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
@@ -153,7 +157,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 }
 .sel-land .sel-num { background: linear-gradient(135deg, #fb923c, #ea580c); }
 .sel-gender .sel-num { background: linear-gradient(135deg, #22d3ee, #0891b2); }
-.sel-aroma .sel-num { background: linear-gradient(135deg, #a78bfa, var(--violet)); }
+.sel-aroma .sel-num { background: linear-gradient(135deg, var(--pink), var(--pink-strong)); }
 .sel-head h2 { font-size: 0.95rem; font-weight: 800; }
 .sel-head p { font-size: 0.68rem; color: var(--muted); font-weight: 600; }
 .sel-check {
@@ -177,10 +181,10 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .pick:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
 .pick.on {
   border-color: var(--pink); background: var(--pink-bg);
-  transform: scale(1.03); box-shadow: 0 4px 16px rgba(255, 45, 120, 0.15);
+  transform: scale(1.03); box-shadow: 0 4px 16px rgba(var(--pink-rgb), 0.35);
 }
-.sel-gender .pick.on { border-color: var(--cyan); background: var(--cyan-bg); box-shadow: 0 4px 16px rgba(8, 145, 178, 0.15); }
-.sel-aroma .pick.on { border-color: var(--violet); background: var(--violet-bg); box-shadow: 0 4px 16px rgba(124, 58, 237, 0.15); }
+.sel-gender .pick.on { border-color: var(--pink-strong); background: var(--pink-soft); box-shadow: 0 4px 16px rgba(var(--pink-rgb), 0.3); }
+.sel-aroma .pick.on { border-color: var(--pink-deep); background: var(--pink-soft); box-shadow: 0 4px 16px rgba(var(--pink-rgb), 0.3); }
 
 .pick-lg { padding: 14px 8px; min-height: 72px; }
 .pick-aroma { align-items: flex-start; text-align: left; padding: 12px; min-height: auto; }
@@ -193,11 +197,11 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 /* Result */
 .result-card {
   margin-top: 16px; padding: 18px; border-radius: var(--r);
-  background: linear-gradient(135deg, var(--pink-bg), var(--violet-bg));
-  border: 1px solid rgba(255, 45, 120, 0.15); text-align: center;
+  background: linear-gradient(135deg, var(--pink-bg), var(--pink-soft));
+  border: 1px solid rgba(var(--pink-rgb), 0.4); text-align: center;
   animation: pop 0.35s cubic-bezier(0.34, 1.4, 0.64, 1);
 }
-.result-tag { font-size: 0.65rem; font-weight: 700; color: var(--pink); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.result-tag { font-size: 0.65rem; font-weight: 700; color: var(--pink-strong); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
 .result-card h3 { font-family: var(--display); font-size: 1.35rem; font-weight: 800; margin-bottom: 10px; }
 .result-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
 .result-chips span {
@@ -221,9 +225,9 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
   cursor: not-allowed; transition: all 0.25s;
 }
 .btn-go.ready {
-  background: linear-gradient(135deg, var(--pink), #e91e8c, var(--violet));
-  color: white; cursor: pointer;
-  box-shadow: 0 8px 28px rgba(255, 45, 120, 0.3);
+  background: linear-gradient(135deg, var(--pink), var(--pink-strong));
+  color: var(--ink); cursor: pointer;
+  box-shadow: 0 8px 28px rgba(var(--pink-rgb), 0.45);
 }
 .btn-go.ready:active { transform: scale(0.98); }
 
@@ -239,7 +243,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
   background: var(--bg); font-family: var(--font); font-size: 0.78rem; font-weight: 700; cursor: pointer;
 }
 .badge-live {
-  padding: 5px 10px; border-radius: 999px; background: #ff0050; color: white;
+  padding: 5px 10px; border-radius: 999px; background: var(--pink-strong); color: white;
   font-size: 0.6rem; font-weight: 800; letter-spacing: 0.08em;
 }
 
@@ -249,7 +253,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 }
 .status-live { background: var(--mint-bg); color: var(--mint); }
 .status-wait { background: #fef9c3; color: #a16207; }
-.status-demo { background: var(--pink-bg); color: var(--pink); }
+.status-demo { background: var(--pink-bg); color: var(--pink-strong); }
 
 .your-mix {
   font-size: 0.72rem; font-weight: 700; color: var(--muted); text-align: center;
@@ -259,14 +263,14 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .mix-lock { margin-right: 4px; }
 
 .stage {
-  background: linear-gradient(180deg, #f8f6ff, #fff);
+  background: linear-gradient(180deg, var(--pink-bg), #fff);
   border-radius: var(--r); padding: 24px 16px; margin-bottom: 14px;
 }
 .machine { position: relative; height: 90px; display: flex; justify-content: center; }
 .machine-box {
   width: 80px; height: 72px; border-radius: 16px;
-  background: linear-gradient(180deg, var(--pink), var(--violet));
-  position: relative; box-shadow: 0 6px 20px rgba(255, 45, 120, 0.25);
+  background: linear-gradient(180deg, var(--pink), var(--pink-strong));
+  position: relative; box-shadow: 0 6px 20px rgba(var(--pink-rgb), 0.4);
 }
 .machine-fluid {
   position: absolute; top: 12px; left: 10px; right: 10px; height: 32px;
@@ -303,7 +307,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 
 .toast {
   padding: 10px 14px; border-radius: 12px; background: var(--pink-bg);
-  font-size: 0.8rem; font-weight: 700; color: var(--pink); text-align: center;
+  font-size: 0.8rem; font-weight: 700; color: var(--pink-strong); text-align: center;
   opacity: 0; transform: translateY(4px); transition: all 0.3s; margin-bottom: 12px; min-height: 18px;
 }
 .toast.show { opacity: 1; transform: none; }
@@ -311,14 +315,14 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
 .game-actions { display: flex; flex-direction: column; gap: 8px; }
 .btn-like {
   padding: 16px; border: none; border-radius: 14px;
-  background: linear-gradient(135deg, #ff0050, var(--pink));
-  color: white; font-family: var(--font); font-size: 1rem; font-weight: 800; cursor: pointer;
-  box-shadow: 0 6px 20px rgba(255, 45, 120, 0.25);
+  background: linear-gradient(135deg, var(--pink), var(--pink-strong));
+  color: var(--ink); font-family: var(--font); font-size: 1rem; font-weight: 800; cursor: pointer;
+  box-shadow: 0 6px 20px rgba(var(--pink-rgb), 0.4);
 }
 .btn-like:active { transform: scale(0.98); }
 .btn-drink {
-  padding: 14px; border-radius: 14px; border: 2px solid var(--violet);
-  background: var(--violet-bg); color: var(--violet);
+  padding: 14px; border-radius: 14px; border: 2px solid var(--pink-strong);
+  background: var(--pink-bg); color: var(--pink-deep);
   font-family: var(--font); font-size: 0.95rem; font-weight: 800; cursor: pointer; display: none;
 }
 .btn-drink.show { display: block; animation: pop 0.3s cubic-bezier(0.34, 1.4, 0.64, 1); }
