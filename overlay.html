@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/styles.css?v=3">
 </head>
 <body class="overlay-mode">
   <div class="overlay-wrap">
@@ -20,10 +20,11 @@
 
       <div class="milk-scene">
         <div class="machine-body" id="machine">
-          <div class="machine-brand">GTM</div>
-          <div class="machine-tank">
+          <div class="machine-window">
             <div class="tank-liquid" id="tank-liquid"></div>
+            <span class="machine-icon" aria-hidden="true">🥛</span>
           </div>
+          <div class="machine-label">MILCH-O-MAT</div>
           <div class="machine-panel">
             <span class="panel-light"></span>
             <span class="panel-light delay"></span>
@@ -45,11 +46,11 @@
         <div class="flash" id="flash"></div>
       </div>
 
-      <div class="gif-banner" id="gif-banner">
-        <span class="gif-banner-emoji" id="gif-emoji">🥛</span>
+      <div class="gif-banner" id="gif-banner" hidden>
+        <span class="gif-banner-emoji" id="gif-emoji"></span>
         <div class="gif-banner-text">
-          <span class="gif-banner-title" id="gif-title">Classic Milk</span>
-          <span class="gif-banner-sub" id="gif-sub">gif this milk</span>
+          <span class="gif-banner-title" id="gif-title"></span>
+          <span class="gif-banner-sub" id="gif-sub"></span>
         </div>
       </div>
 

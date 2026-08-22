@@ -32,7 +32,7 @@ export function updateMeter(ui, level) {
   ui.meterFill.style.width = `${pct}%`;
   ui.meterFill.classList.toggle('full', pct >= 95);
   if (ui.meterLabel) ui.meterLabel.textContent = `${Math.round(pct)}%`;
-  if (ui.tankLiquid) ui.tankLiquid.style.height = `${30 + pct * 0.45}%`;
+  if (ui.tankLiquid) ui.tankLiquid.style.height = `${35 + pct * 0.5}%`;
 }
 
 export function updateLeaderboard(ui, list) {
@@ -85,6 +85,7 @@ function showGifBanner(ui, event) {
   ui.gifEmoji.textContent = event.milk?.emoji || '🥛';
   ui.gifTitle.textContent = event.milk?.name || 'gif this milk';
   ui.gifSub.textContent = event.isNewUnlock ? '✨ Neu freigeschaltet' : `@${event.user}`;
+  ui.gifBanner.hidden = false;
   ui.gifBanner.classList.remove('show');
   void ui.gifBanner.offsetWidth;
   ui.gifBanner.classList.add('show');

@@ -110,14 +110,52 @@ body.overlay-preview {
 
 .machine-body {
   position: relative;
-  width: 130px;
-  height: 130px;
+  width: 138px;
+  height: 148px;
   flex-shrink: 0;
-  background: linear-gradient(180deg, #4a4760, #232130 55%, #15141d);
-  border-radius: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.12);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, #ff6b9d 0%, #c44dff 10%, #3d3a52 10%, #1e1c28 100%);
+  border-radius: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 14px 36px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.12);
 }
+
+.machine-label {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 0.52rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.machine-window {
+  position: absolute;
+  top: 28px;
+  left: 12px;
+  right: 12px;
+  height: 68px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.35);
+  overflow: hidden;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.35);
+}
+
+.machine-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
+  opacity: 0.22;
+  pointer-events: none;
+}
+
+.machine-brand,
+.machine-tank { display: none; }
 
 .machine-body.shake { animation: shake 0.4s ease; }
 .machine-body.explode { animation: explode 0.55s ease; }
@@ -134,44 +172,29 @@ body.overlay-preview {
   100% { transform: scale(1); }
 }
 
-.machine-brand {
-  position: absolute;
-  top: 8px;
-  right: 10px;
-  font-size: 0.55rem;
-  letter-spacing: 0.14em;
-  color: rgba(255, 255, 255, 0.35);
-  font-weight: 800;
-}
-
-.machine-tank {
-  position: absolute;
-  top: 16px;
-  left: 12px;
-  right: 12px;
-  height: 58px;
-  border-radius: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: rgba(0, 0, 0, 0.25);
-  overflow: hidden;
-}
-
 .tank-liquid {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 50%;
-  background: linear-gradient(180deg, rgba(255,255,255,0.5), var(--milk));
+  height: 42%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.65) 0%, #fff8f0 30%, #f0e6d8 100%);
   transition: height 0.4s ease, background 0.3s ease;
+  animation: milk-wave 2.5s ease-in-out infinite;
+}
+
+@keyframes milk-wave {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.03); }
 }
 
 .machine-panel {
   position: absolute;
-  bottom: 34px;
-  left: 12px;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  gap: 5px;
+  gap: 6px;
 }
 
 .panel-light {
