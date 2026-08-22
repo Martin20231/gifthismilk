@@ -1,24 +1,24 @@
 import {
-  CONCEPT,
   COUNTRIES,
   GENDER_OPTIONS,
-  clearSelection,
   findProfile,
   getCountry,
-  getGenderOption,
-  getSelection,
   getSexualityOptions,
   getStreamState,
   resetStreamState,
-  saveSelection,
   saveStreamState,
 } from './data.js';
 
 const app = document.getElementById('app');
 
-function nav(path) {
-  location.hash = path;
-}
+const selection = {
+  country: null,
+  gender: null,
+  sexuality: null,
+};
+
+let streamState = getStreamState();
+let gameActive = false;
 
 function esc(str) {
   const d = document.createElement('div');
@@ -26,270 +26,212 @@ function esc(str) {
   return d.innerHTML;
 }
 
-function parseRoute() {
-  const parts = location.hash.slice(1).split('/').filter(Boolean);
-  return parts;
+function sexualityOptions() {
+  if (!selection.country || !selection.gender) return [];
+  return getSexualityOptions(selection.country, selection.gender);
 }
 
-function stepBar(step) {
-  const labels = ['Land', 'Geschlecht', 'Aroma', 'Stream'];
-  return `
-    <div class="step-bar">
-      ${labels.map((l, i) => `
-        <div class="step-item ${i + 1 <= step ? 'done' : ''} ${i + 1 === step ? 'active' : ''}">
-          <span class="step-num">${i + 1}</span>
-          <span class="step-label">${l}</span>
-        </div>
-      `).join('')}
-    </div>`;
+function isReady() {
+  return selection.country && selection.gender && selection.sexuality;
 }
 
-function layout(content, { step = 0, back = null, title = 'Gif This Milk' } = {}) {
-  document.title = title;
+function getProfile() {
+  if (!isReady()) return null;
+  return findProfile(selection.country, selection.gender, selection.sexuality);
+}
+
+function render() {
+  const profile = getProfile();
+  const country = selection.country ? getCountry(selection.country) : null;
+
   app.innerHTML = `
-    <div class="app-shell ${step === 4 ? 'stream-mode' : ''}">
-      ${step && step < 4 ? stepBar(step) : ''}
-      ${back !== null ? `<header class="topbar"><button class="back-btn" data-back="${esc(back)}">←</button></header>` : ''}
-      <main class="main">${content}</main>
-      ${step < 4 ? '<footer class="footer"><span class="accent">gif this milk</span></footer>' : ''}
-    </div>`;
-  app.querySelector('[data-back]')?.addEventListener('click', (e) => nav(e.target.dataset.back));
-}
+    <div class="page ${gameActive ? 'game-active' : ''}">
+      <!-- Setup: alles auf einer Seite -->
+      <section class="setup" id="setup">
+        <header class="hero">
+          <p class="eyebrow">Gif This Milk</p>
+          <h1>Stell deine Milch zusammen</h1>
+          <p class="lead">Land · Geschlecht · Aroma — dann Spiel starten.</p>
+        </header>
 
-function renderHome() {
-  layout(`
-    <section class="hero">
-      <p class="eyebrow">Gif This Milk</p>
-      <h1>Stell deine Milch zusammen</h1>
-      <p class="lead">Land → Geschlecht → Aroma — dann live im Stream: liken, füllen, trinken.</p>
-    </section>
-    <div class="concept-grid">
-      ${Object.values(CONCEPT).map((c) => `
-        <article class="concept-card">
-          <span class="concept-icon">${c.icon}</span>
-          <h2>${esc(c.title)}</h2>
-          <p>${esc(c.text)}</p>
-        </article>
-      `).join('')}
-    </div>
-    <button class="btn btn-primary" id="start">🌍 Land wählen — Start</button>
-  `, { title: 'Gif This Milk — Start' });
-
-  document.getElementById('start').addEventListener('click', () => nav('/land'));
-}
-
-function renderLand() {
-  layout(`
-    <section class="page-head">
-      <h1>🌍 Dein Land</h1>
-      <p>Bestimmt deine Milch-Sorte</p>
-    </section>
-    <div class="pick-grid">
-      ${COUNTRIES.map((c) => `
-        <button class="pick-card" data-country="${c.code}">
-          <span class="pick-icon">${c.flag}</span>
-          <strong>${esc(c.name)}</strong>
-          <span>${esc(c.sorte)}</span>
-        </button>
-      `).join('')}
-    </div>
-  `, { step: 1, back: '/', title: 'Land wählen' });
-
-  app.querySelectorAll('[data-country]').forEach((btn) => {
-    btn.addEventListener('click', () => nav(`/geschlecht/${btn.dataset.country}`));
-  });
-}
-
-function renderGender(countryCode) {
-  const country = getCountry(countryCode);
-  if (!country) return renderHome();
-
-  layout(`
-    <section class="page-head">
-      <h1>⚧️ Dein Geschlecht</h1>
-      <p>${country.flag} ${esc(country.name)} · bestimmt den Geschmack</p>
-    </section>
-    <div class="pick-grid pick-grid-sm">
-      ${GENDER_OPTIONS.map((g) => `
-        <button class="pick-card" data-gender="${g.id}">
-          <span class="pick-icon">${g.icon}</span>
-          <strong>${esc(g.label)}</strong>
-          <span>${esc(g.desc)}</span>
-        </button>
-      `).join('')}
-    </div>
-  `, { step: 2, back: '/land', title: 'Geschlecht wählen' });
-
-  app.querySelectorAll('[data-gender]').forEach((btn) => {
-    btn.addEventListener('click', () => nav(`/aroma/${countryCode}/${btn.dataset.gender}`));
-  });
-}
-
-function renderAroma(countryCode, genderKey) {
-  const country = getCountry(countryCode);
-  const gender = getGenderOption(genderKey);
-  if (!country || !gender) return renderHome();
-
-  const options = getSexualityOptions(countryCode, genderKey);
-  if (!options.length) {
-    layout(`<p class="empty">Keine Sorte für diese Kombination.</p>`, { step: 3, back: `/geschlecht/${countryCode}` });
-    return;
-  }
-
-  layout(`
-    <section class="page-head">
-      <h1>🌈 Deine Sexualität</h1>
-      <p>${country.flag} · ${esc(gender.label)} · bestimmt das Aroma</p>
-    </section>
-    <div class="pick-list">
-      ${options.map((p) => `
-        <button class="pick-row" data-sexuality="${esc(p.sexuality)}">
-          <div>
-            <strong>${esc(p.sexuality)}</strong>
-            <span>Aroma: ${esc(p.aroma)}</span>
-            <span>Geschmack: ${esc(p.taste)}</span>
+        <div class="selector-block">
+          <h2>🌍 Land <span class="hint">= Sorte</span></h2>
+          <div class="chip-grid" id="countries">
+            ${COUNTRIES.map((c) => `
+              <button type="button" class="chip ${selection.country === c.code ? 'selected' : ''}" data-country="${c.code}">
+                ${c.flag} ${esc(c.name)}
+              </button>
+            `).join('')}
           </div>
-          <span class="arrow">→</span>
+        </div>
+
+        <div class="selector-block ${selection.country ? '' : 'disabled'}">
+          <h2>⚧️ Geschlecht <span class="hint">= Geschmack</span></h2>
+          <div class="chip-grid" id="genders">
+            ${GENDER_OPTIONS.map((g) => `
+              <button type="button" class="chip ${selection.gender === g.id ? 'selected' : ''}" data-gender="${g.id}" ${selection.country ? '' : 'disabled'}>
+                ${g.icon} ${esc(g.label)}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="selector-block ${selection.gender ? '' : 'disabled'}">
+          <h2>🌈 Sexualität <span class="hint">= Aroma</span></h2>
+          <div class="chip-list" id="sexualities">
+            ${selection.gender ? (sexualityOptions().length ? sexualityOptions().map((p) => `
+              <button type="button" class="chip-row ${selection.sexuality === p.sexuality ? 'selected' : ''}" data-sexuality="${esc(p.sexuality)}">
+                <strong>${esc(p.sexuality)}</strong>
+                <span>${esc(p.aroma)} · ${esc(p.taste)}</span>
+              </button>
+            `).join('') : '<p class="empty-msg">Keine Option für diese Kombination.</p>') : '<p class="empty-msg">Zuerst Land und Geschlecht wählen.</p>'}
+          </div>
+        </div>
+
+        ${profile && country ? `
+          <div class="preview-box">
+            <p>Deine Milch:</p>
+            <strong>${country.flag} ${esc(country.sorte)}</strong>
+            <span>⚧️ ${esc(profile.taste)} · 🌈 ${esc(profile.aroma)}</span>
+          </div>
+        ` : ''}
+
+        <button type="button" class="btn btn-start" id="start-game" ${isReady() ? '' : 'disabled'}>
+          🎮 Spiel starten
         </button>
-      `).join('')}
-    </div>
-  `, { step: 3, back: `/geschlecht/${countryCode}`, title: 'Aroma wählen' });
+      </section>
 
-  app.querySelectorAll('[data-sexuality]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const profile = findProfile(countryCode, genderKey, btn.dataset.sexuality);
-      if (!profile) return;
-      saveSelection({
-        country: countryCode,
-        gender: genderKey,
-        sexuality: profile.sexuality,
-        profileId: profile.id,
-      });
-      resetStreamState();
-      nav('/stream');
-    });
-  });
-}
-
-function renderStream() {
-  const sel = getSelection();
-  if (!sel?.profileId) {
-    nav('/');
-    return;
-  }
-
-  const profile = findProfile(sel.country, sel.gender, sel.sexuality);
-  const country = getCountry(sel.country);
-  if (!profile || !country) {
-    nav('/');
-    return;
-  }
-
-  let state = getStreamState();
-
-  function mount() {
-    layout(`
-      <div class="stream-overlay">
+      <!-- Spiel: Glas -->
+      <section class="game" id="game">
         <header class="stream-header">
+          <button type="button" class="back-setup" id="back-setup">← Zurück</button>
           <span class="live-badge">● LIVE</span>
           <h1>Gif This Milk</h1>
           <p class="stream-slogan">gif this milk</p>
         </header>
 
-        <div class="stream-info">
-          <span>${country.flag} ${esc(country.sorte)}</span>
-          <span>⚧️ ${esc(profile.taste)}</span>
-          <span>🌈 ${esc(profile.aroma)}</span>
-        </div>
+        ${profile && country ? `
+          <div class="stream-info">
+            <span>${country.flag} ${esc(country.sorte)}</span>
+            <span>⚧️ ${esc(profile.taste)}</span>
+            <span>🌈 ${esc(profile.aroma)}</span>
+          </div>
+        ` : ''}
 
         <div class="machine-mini">
           <div class="machine-mini-body">
             <div class="machine-mini-tank"></div>
             <div class="machine-mini-nozzle"></div>
           </div>
-          <div class="stream-pour ${state.pouring ? 'active' : ''}" id="pour-line"></div>
+          <div class="stream-pour ${streamState.pouring ? 'active' : ''}"></div>
         </div>
 
         <div class="glass-wrap">
-          <div class="glass" id="glass">
-            <div class="glass-milk" id="glass-milk" style="height:${state.fill}%"></div>
+          <div class="glass ${streamState.drinking ? 'drinking' : ''}" id="glass">
+            <div class="glass-milk" style="height:${streamState.fill}%"></div>
             <div class="glass-shine"></div>
           </div>
-          <p class="glass-label" id="glass-label">${state.fill >= 100 ? 'Voll!' : `${Math.round(state.fill)}% voll`}</p>
+          <p class="glass-label">${streamState.fill >= 100 ? 'Voll — trinken!' : `${Math.round(streamState.fill)}% voll`}</p>
         </div>
 
-        <div class="stream-toast ${state.toast ? 'show' : ''}" id="stream-toast">${esc(state.toast || '')}</div>
+        <div class="stream-toast ${streamState.toast ? 'show' : ''}">${esc(streamState.toast || '')}</div>
 
         <div class="stream-actions">
-          <button class="like-btn" id="like-btn" ${state.fill >= 100 ? 'disabled' : ''}>
-            ❤️ Like <span id="like-count">${state.likes}</span>
+          <button type="button" class="like-btn" id="like-btn" ${streamState.fill >= 100 ? 'disabled' : ''}>
+            ❤️ Like <span>${streamState.likes}</span>
           </button>
-          <button class="drink-btn ${state.fill >= 100 ? 'show' : ''}" id="drink-btn">
+          <button type="button" class="drink-btn ${streamState.fill >= 100 ? 'show' : ''}" id="drink-btn">
             🥤 Trinken
           </button>
         </div>
 
-        <p class="stream-hint" id="stream-hint">
-          ${state.fill >= 100 ? 'Glas ist voll — trink deine Milch!' : 'Like = Milch ins Glas. Bei 100% trinken.'}
+        <p class="stream-hint">
+          ${streamState.fill >= 100 ? 'Glas voll — tippe Trinken!' : 'Like = Milch ins Glas. Bei 100% trinken.'}
         </p>
+      </section>
+    </div>
+  `;
 
-        <button class="btn-link" id="restart">↺ Neu zusammenstellen</button>
-      </div>
-    `, { step: 4, title: 'Live Stream' });
+  bindEvents();
+}
 
-    document.getElementById('like-btn')?.addEventListener('click', onLike);
-    document.getElementById('drink-btn')?.addEventListener('click', onDrink);
-    document.getElementById('restart')?.addEventListener('click', () => {
-      clearSelection();
-      resetStreamState();
-      nav('/');
+function bindEvents() {
+  document.querySelectorAll('[data-country]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      selection.country = btn.dataset.country;
+      selection.gender = null;
+      selection.sexuality = null;
+      render();
     });
-  }
+  });
 
-  function onLike() {
-    if (state.fill >= 100) return;
-    state.likes += 1;
-    const boost = 8 + Math.floor(Math.random() * 10);
-    state.fill = Math.min(100, state.fill + boost);
-    state.pouring = true;
-    state.toast = `+${boost}% Milch! ❤️`;
-    saveStreamState(state);
-    mount();
-    setTimeout(() => {
-      state.pouring = false;
-      if (state.fill >= 100) state.toast = '🥛 Glas voll — jetzt trinken!';
-      saveStreamState(state);
-      mount();
-    }, 700);
-  }
+  document.querySelectorAll('[data-gender]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (!selection.country) return;
+      selection.gender = btn.dataset.gender;
+      selection.sexuality = null;
+      render();
+    });
+  });
 
-  function onDrink() {
-    if (state.fill < 100) return;
-    state.drunk += 1;
-    state.toast = 'Schluck schluck… gif this milk! 🥛';
-    state.pouring = false;
-    const glass = document.getElementById('glass');
-    glass?.classList.add('drinking');
-    setTimeout(() => {
-      state.fill = 0;
-      state.toast = `Leer! ${state.drunk}× getrunken — keep liking!`;
-      saveStreamState(state);
-      mount();
-    }, 1400);
-  }
+  document.querySelectorAll('[data-sexuality]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      selection.sexuality = btn.dataset.sexuality;
+      render();
+    });
+  });
 
-  mount();
+  document.getElementById('start-game')?.addEventListener('click', () => {
+    if (!isReady()) return;
+    resetStreamState();
+    streamState = getStreamState();
+    gameActive = true;
+    render();
+    document.getElementById('game')?.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  document.getElementById('back-setup')?.addEventListener('click', () => {
+    gameActive = false;
+    render();
+    document.getElementById('setup')?.scrollIntoView({ behavior: 'smooth' });
+  });
+
+  document.getElementById('like-btn')?.addEventListener('click', onLike);
+  document.getElementById('drink-btn')?.addEventListener('click', onDrink);
 }
 
-function router() {
-  const p = parseRoute();
-  if (!p.length) return renderHome();
-  if (p[0] === 'land') return renderLand();
-  if (p[0] === 'geschlecht' && p[1]) return renderGender(p[1]);
-  if (p[0] === 'aroma' && p[1] && p[2]) return renderAroma(p[1], p[2]);
-  if (p[0] === 'stream') return renderStream();
-  return renderHome();
+function onLike() {
+  if (streamState.fill >= 100) return;
+  streamState.likes += 1;
+  const boost = 8 + Math.floor(Math.random() * 10);
+  streamState.fill = Math.min(100, streamState.fill + boost);
+  streamState.pouring = true;
+  streamState.toast = `+${boost}% Milch! ❤️`;
+  streamState.drinking = false;
+  saveStreamState(streamState);
+  render();
+  setTimeout(() => {
+    streamState.pouring = false;
+    if (streamState.fill >= 100) streamState.toast = '🥛 Voll — jetzt trinken!';
+    saveStreamState(streamState);
+    render();
+  }, 650);
 }
 
-window.addEventListener('hashchange', router);
-router();
+function onDrink() {
+  if (streamState.fill < 100) return;
+  streamState.drunk = (streamState.drunk || 0) + 1;
+  streamState.drinking = true;
+  streamState.toast = 'Schluck schluck… gif this milk! 🥛';
+  saveStreamState(streamState);
+  render();
+  setTimeout(() => {
+    streamState.fill = 0;
+    streamState.drinking = false;
+    streamState.toast = `${streamState.drunk}× getrunken — keep liking!`;
+    saveStreamState(streamState);
+    render();
+  }, 1300);
+}
+
+render();
