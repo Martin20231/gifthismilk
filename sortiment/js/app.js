@@ -4,6 +4,9 @@ import {
   getCountry,
   getProfile,
   getProfilesByCountry,
+  saveToCollection,
+  getCollection,
+  buildMilkProduct,
 } from './data.js';
 
 const app = document.getElementById('app');
@@ -63,9 +66,15 @@ function renderHome() {
     </section>
 
     <section class="cta-block">
-      <h2>Entdecke alle Sorten</h2>
-      <p>Wähle ein Land und finde die verfügbaren Profile.</p>
-      <button class="btn btn-primary" id="go-countries">🌍 Länder anzeigen</button>
+      <h2>So funktioniert's</h2>
+      <ol class="flow-steps">
+        <li><strong>Land wählen</strong> → bestimmt die Sorte</li>
+        <li><strong>Profil wählen</strong> → Geschmack & Aroma</li>
+        <li><strong>Milch pressen</strong> → deine Flasche + Gif</li>
+        <li><strong>Teilen</strong> → TikTok, Story, Stream</li>
+      </ol>
+      <button class="btn btn-primary" id="go-countries">🌍 Los geht's — Länder wählen</button>
+      <a href="#/sammlung" class="link-sammlung">🥛 Meine Milch-Sammlung</a>
     </section>
   `, { title: 'Sortiment — Start' });
 
@@ -193,6 +202,12 @@ function renderProfile(id) {
         <p>${esc(profile.bio)}</p>
       </section>
 
+      <section class="action-box">
+        <h2>Was passiert als Nächstes?</h2>
+        <p>Du wählst diese Sorte — wir pressen deine personalisierte Milch-Flasche und erstellen ein sharebares Gif.</p>
+        <button class="btn btn-primary" id="choose-milk">🥛 Diese Sorte wählen — gif this milk</button>
+      </section>
+
       <button class="btn btn-secondary" id="back-country">← Zurück zu ${esc(country.name)}</button>
     </article>
   `, { back: `/land/${profile.country}`, title: `${profile.name} — Sortiment` });
@@ -200,6 +215,128 @@ function renderProfile(id) {
   document.getElementById('back-country').addEventListener('click', () => {
     nav(`/land/${profile.country}`);
   });
+
+  document.getElementById('choose-milk').addEventListener('click', () => {
+    nav(`/milch/${profile.id}`);
+  });
+}
+
+function renderMilch(id) {
+  const profile = getProfile(id);
+  if (!profile) {
+    renderNotFound();
+    return;
+  }
+
+  const country = getCountry(profile.country);
+  const product = saveToCollection(id);
+  const overlayUrl = new URL('../overlay.html', window.location.href).href;
+
+  layout(`
+    <section class="result-hero">
+      <p class="eyebrow">Fertig gepresst</p>
+      <h1>Deine Milch ist da!</h1>
+      <p class="lead">Aus ${esc(country.name)} · ${esc(profile.taste)} · ${esc(profile.aroma)}</p>
+    </section>
+
+    <div class="bottle-result" id="bottle-result">
+      <div class="bottle-visual">
+        <div class="bottle-cap"></div>
+        <div class="bottle-body">
+          <div class="bottle-label">
+            <span class="bottle-flag">${country.flag}</span>
+            <strong>${esc(product.label)}</strong>
+            <span>${esc(country.sorte)}</span>
+            <span class="bottle-notes">${esc(profile.taste)}</span>
+            <span class="bottle-notes">${esc(profile.aroma)}</span>
+            <span class="bottle-slogan">gif this milk</span>
+          </div>
+          <div class="bottle-liquid-fill"></div>
+        </div>
+      </div>
+      <div class="pour-effect">🥛</div>
+    </div>
+
+    <section class="result-actions">
+      <h2>Was du jetzt machen kannst</h2>
+      <div class="action-list">
+        <button class="action-card" id="copy-share">
+          <span>📋</span>
+          <div>
+            <strong>Link kopieren</strong>
+            <span>Für TikTok-Bio oder Story</span>
+          </div>
+        </button>
+        <a class="action-card" href="${esc(overlayUrl)}" target="_blank" rel="noopener">
+          <span>📺</span>
+          <div>
+            <strong>Im Stream zeigen</strong>
+            <span>OBS Overlay öffnen</span>
+          </div>
+        </a>
+        <button class="action-card" id="go-sammlung">
+          <span>🗂️</span>
+          <div>
+            <strong>Zur Sammlung</strong>
+            <span>Alle deine Sorten</span>
+          </div>
+        </button>
+      </div>
+    </section>
+
+    <button class="btn btn-secondary" id="pick-another">← Andere Sorte wählen</button>
+  `, { back: `/profil/${id}`, title: `${product.label} — Fertig` });
+
+  document.getElementById('copy-share').addEventListener('click', async () => {
+    const text = `🥛 ${product.label}\n${country.sorte} · ${profile.taste} · ${profile.aroma}\ngif this milk\n${location.href}`;
+    try {
+      await navigator.clipboard.writeText(text);
+      const btn = document.getElementById('copy-share');
+      btn.querySelector('strong').textContent = 'Kopiert! ✓';
+    } catch {
+      alert(text);
+    }
+  });
+
+  document.getElementById('go-sammlung').addEventListener('click', () => nav('/sammlung'));
+  document.getElementById('pick-another').addEventListener('click', () => nav('/laender'));
+
+  setTimeout(() => {
+    document.getElementById('bottle-result')?.classList.add('animated');
+  }, 100);
+}
+
+function renderSammlung() {
+  const items = getCollection();
+
+  layout(`
+    <section class="page-head">
+      <h1>Meine Milch-Sammlung</h1>
+      <p>${items.length} Sorten gepresst</p>
+    </section>
+
+    ${items.length ? `
+      <div class="collection-list">
+        ${items.map((item) => `
+          <a href="#/milch/${esc(item.id)}" class="collection-item">
+            <span class="collection-emoji">🥛</span>
+            <div>
+              <strong>${esc(item.label)}</strong>
+              <span>${esc(item.sorte)} · ${esc(item.aroma)}</span>
+            </div>
+            <span>→</span>
+          </a>
+        `).join('')}
+      </div>
+    ` : `
+      <section class="empty-page">
+        <p>Noch keine Milch gepresst.</p>
+        <button class="btn btn-primary" id="start-pick">Sorte wählen</button>
+      </section>
+    `}
+  `, { back: '/', title: 'Meine Sammlung' });
+
+  document.getElementById('start-pick')?.addEventListener('click', () => nav('/laender'));
 }
 
 function renderNotFound() {
@@ -220,6 +357,8 @@ function router() {
   if (parts[0] === 'laender') return renderCountries();
   if (parts[0] === 'land' && parts[1]) return renderCountry(parts[1], parts[2] || 'all');
   if (parts[0] === 'profil' && parts[1]) return renderProfile(parts[1]);
+  if (parts[0] === 'milch' && parts[1]) return renderMilch(parts[1]);
+  if (parts[0] === 'sammlung') return renderSammlung();
   return renderNotFound();
 }
 

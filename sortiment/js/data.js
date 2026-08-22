@@ -234,3 +234,36 @@ export function getProfilesByCountry(code, genderFilter = 'all') {
 export function getProfile(id) {
   return PROFILES.find((p) => p.id === id);
 }
+
+export function buildMilkProduct(profile) {
+  const country = getCountry(profile.country);
+  return {
+    id: profile.id,
+    label: `${profile.name} Milch™`,
+    sorte: country.sorte,
+    land: `${country.flag} ${country.name}`,
+    geschmack: profile.taste,
+    aroma: profile.aroma,
+    createdAt: Date.now(),
+  };
+}
+
+const STORAGE_KEY = 'gif-this-milk-sammlung';
+
+export function saveToCollection(profileId) {
+  const profile = getProfile(profileId);
+  if (!profile) return null;
+  const product = buildMilkProduct(profile);
+  const list = getCollection().filter((p) => p.id !== profileId);
+  list.unshift(product);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(list.slice(0, 20)));
+  return product;
+}
+
+export function getCollection() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  } catch {
+    return [];
+  }
+}
