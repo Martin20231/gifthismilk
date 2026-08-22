@@ -84,6 +84,18 @@ export function startLiveSession(profile) {
   socket.emit('sortiment:start', profile);
 }
 
+export function sendChatCommand(user, comment) {
+  if (!socket?.connected) return false;
+  socket.emit('sortiment:chat', { user, comment });
+  return true;
+}
+
+export function registerProfile(user, country, gender, sexuality) {
+  if (!socket?.connected) return false;
+  socket.emit('sortiment:register', { user, country, gender, sexuality });
+  return true;
+}
+
 export function demoLike(user = 'Demo') {
   if (socket?.connected) {
     socket.emit('sortiment:like', { user });

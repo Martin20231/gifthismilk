@@ -6,6 +6,7 @@ const { Server } = require('socket.io');
 const { createTikTokBridge } = require('./tiktok-bridge');
 const { MILK_TYPES, pickRandomMilk, processEvent } = require('./events');
 const sortimentStream = require('./sortiment-stream');
+const chatRegistry = require('./chat-registry');
 
 const PORT = process.env.PORT || 3847;
 const ROOT = path.join(__dirname, '..');
@@ -29,11 +30,16 @@ function broadcastOverlayState() {
   io.emit('state', overlayState);
 }
 
-function broadcastSortimentState() {
-  io.emit('sortiment:state', sortimentStream.getState());
+function broadcastSortimentState(extra = {}) {
+  io.emit('sortiment:state', {
+    ...sortimentStream.getState(),
+    ...chatRegistry.getSnapshot(),
+    ...extra,
+  });
 }
 
 sortimentStream.setBroadcaster(() => broadcastSortimentState());
+chatRegistry.setBroadcaster((event) => broadcastSortimentState({ lastRegistryEvent: event }));
 
 function applyOverlayEvent(event) {
   const result = processEvent(event, overlayState);
@@ -48,8 +54,12 @@ function applyTikTokEvent(event) {
 
   if (event.type === 'like') {
     sortimentStream.handleLike(event);
-  } else if (event.type === 'chat' && sortimentStream.isDrinkCommand(event.comment)) {
-    sortimentStream.handleDrink(event);
+  } else if (event.type === 'chat') {
+    if (sortimentStream.isDrinkCommand(event.comment)) {
+      sortimentStream.handleDrink(event);
+    } else {
+      chatRegistry.handleChat(event.user, event.comment);
+    }
   } else if (event.type === 'drink') {
     sortimentStream.handleDrink(event);
   }
@@ -59,7 +69,10 @@ function applyTikTokEvent(event) {
 
 io.on('connection', (socket) => {
   socket.emit('state', overlayState);
-  socket.emit('sortiment:state', sortimentStream.getState());
+  socket.emit('sortiment:state', {
+    ...sortimentStream.getState(),
+    ...chatRegistry.getSnapshot(),
+  });
 
   socket.on('simulate', (payload) => {
     applyOverlayEvent({ type: 'simulate', ...payload });
@@ -77,7 +90,17 @@ io.on('connection', (socket) => {
     }
     if (sortimentStream.isDrinkCommand(cmd)) {
       sortimentStream.handleDrink({ user: user || 'anonymous', comment: cmd });
+    } else {
+      chatRegistry.handleChat(user || 'anonymous', comment);
     }
+  });
+
+  socket.on('sortiment:register', ({ user, country, gender, sexuality }) => {
+    chatRegistry.registerFromApp(user || 'App', country, gender, sexuality);
+  });
+
+  socket.on('sortiment:chat', ({ user, comment }) => {
+    chatRegistry.handleChat(user || 'Demo', comment);
   });
 
   /* ── Sortiment live stream ── */
@@ -97,7 +120,15 @@ io.on('connection', (socket) => {
 app.get('/api/state', (_req, res) => res.json(overlayState));
 
 app.get('/api/sortiment/state', (_req, res) => {
-  res.json(sortimentStream.getState());
+  res.json({
+    ...sortimentStream.getState(),
+    ...chatRegistry.getSnapshot(),
+  });
+});
+
+app.post('/api/sortiment/chat', express.json(), (req, res) => {
+  const event = chatRegistry.handleChat(req.body?.user || 'API', req.body?.comment || '');
+  res.json(event);
 });
 
 app.post('/api/event', express.json(), (req, res) => {

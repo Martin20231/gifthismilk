@@ -52,8 +52,10 @@ Optional: `npm install @tiktool/live`
 
 | Aktion | Reaktion |
 |--------|----------|
-| **Like** | Glas füllt sich für alle (Sortiment) |
-| Chat **`trinken`** | Glas leeren wenn voll (Sortiment) |
+| Chat **`land de`** | Sorte wählen (Schritt 1/3) |
+| Chat **`geschlecht frau`** | Geschmack wählen (2/3) |
+| Chat **`sexualität heterosexuell`** | Aroma wählen → registriert! |
+| Chat **`trinken`** | Glas leeren wenn voll |
 | Chat `!milch` / `!gif` | Milch wird gepresst (Overlay) |
 | Like-Burst | Milch-Level steigt → Fontäne bei 100% |
 | Rose (Gift) | Traurige Milch freischalten |
