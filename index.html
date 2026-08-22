@@ -2,7 +2,8 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#09090f">
   <title>Gif This Milk — Demo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,31 +13,28 @@
 <body class="demo-bg">
   <main class="demo-page">
     <header class="hero">
-      <div class="hero-badge"><span class="status-dot" id="status-dot"></span><span id="status-text">Live-Vorschau lädt…</span></div>
+      <div class="hero-badge"><span class="status-dot" id="status-dot"></span> <span id="status-text">Live-Demo</span></div>
       <h1>Gif This Milk</h1>
       <p class="tagline">gif this milk</p>
     </header>
 
-    <section class="demo-section preview-section">
+    <section class="demo-section">
       <h2>Stream-Vorschau</h2>
       <div class="phone-shell">
         <div class="phone-notch"></div>
-        <div class="phone-label">TikTok Live Overlay</div>
-        <div class="overlay-wrap preview-overlay">
+        <div class="phone-label">TikTok Live</div>
+        <div class="overlay-wrap">
           <div class="overlay-card" id="preview-card">
             <header class="overlay-header">
               <h1>Gif This Milk</h1>
               <p class="slogan">gif this milk</p>
             </header>
 
-            <div class="milk-machine">
-              <div class="machine-ambient"></div>
+            <div class="milk-scene">
               <div class="machine-body" id="preview-machine">
-                <div class="machine-shine"></div>
                 <div class="machine-brand">GTM</div>
                 <div class="machine-tank">
                   <div class="tank-liquid" id="preview-tank-liquid"></div>
-                  <div class="tank-bubbles"></div>
                 </div>
                 <div class="machine-panel">
                   <span class="panel-light"></span>
@@ -57,11 +55,13 @@
               <div class="particles" id="preview-particles"></div>
               <div class="float-layer" id="preview-float-layer"></div>
               <div class="flash" id="preview-flash"></div>
-              <div class="gif-card" id="preview-gif-card">
-                <div class="gif-card-shine"></div>
-                <span class="gif-card-emoji" id="preview-gif-emoji">🥛</span>
-                <span class="gif-card-title" id="preview-gif-title">gif this milk</span>
-                <span class="gif-card-sub" id="preview-gif-sub">ready to pour</span>
+            </div>
+
+            <div class="gif-banner" id="preview-gif-banner">
+              <span class="gif-banner-emoji" id="preview-gif-emoji">🥛</span>
+              <div class="gif-banner-text">
+                <span class="gif-banner-title" id="preview-gif-title">Classic Milk</span>
+                <span class="gif-banner-sub" id="preview-gif-sub">gif this milk</span>
               </div>
             </div>
 
@@ -73,7 +73,7 @@
             </div>
 
             <div class="event-toast visible" id="preview-toast">
-              <span id="preview-toast-text">Drück 🌹 Rose — und sieh die Magie.</span>
+              <span id="preview-toast-text">Tippe 🌹 Rose unten</span>
               <div class="gif-tag" id="preview-gif-tag">gif this milk</div>
             </div>
 
@@ -84,11 +84,11 @@
           </div>
         </div>
       </div>
-      <p class="preview-hint">Sieht so aus wie im echten TikTok-Stream — direkt in OBS nutzbar.</p>
+      <p class="preview-hint">So erscheint es im TikTok-Stream.</p>
     </section>
 
     <section class="demo-section">
-      <h2>TikTok Events testen</h2>
+      <h2>Events testen</h2>
       <div class="btn-grid">
         <button class="btn" data-sim="chat">💬 !milch</button>
         <button class="btn" data-sim="like">❤️ Likes</button>
@@ -96,7 +96,7 @@
         <button class="btn" data-sim="gift-medium">💖 Heart</button>
         <button class="btn" data-sim="gift-large">💎 Universe</button>
         <button class="btn" data-sim="follow">➕ Follow</button>
-        <button class="btn btn-primary" data-sim="fountain">🌊 Milch-Fontäne</button>
+        <button class="btn btn-primary" data-sim="fountain">🌊 Fontäne</button>
       </div>
     </section>
 
@@ -106,11 +106,10 @@
     </section>
 
     <section class="demo-section link-box">
-      <strong>OBS Browser Source</strong>
+      <strong>OBS Overlay URL</strong>
       <code id="overlay-url"></code>
     </section>
   </main>
-
   <script type="module" src="js/demo.js"></script>
 </body>
 </html>

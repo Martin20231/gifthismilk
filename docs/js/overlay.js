@@ -1,8 +1,12 @@
-import { CHANNEL_NAME, MILK_TYPES, createState, processEvent } from './engine.js';
+import { CHANNEL_NAME } from './engine.js';
 import { bindOverlayUI, handleMilkEvent, updateLeaderboard, updateMeter } from './ui.js';
 
 const ui = bindOverlayUI();
 const channel = new BroadcastChannel(CHANNEL_NAME);
+
+if (new URLSearchParams(location.search).get('preview') === '1') {
+  document.body.classList.add('overlay-preview');
+}
 
 channel.onmessage = ({ data }) => {
   if (data.type === 'sync') {
@@ -17,6 +21,8 @@ channel.onmessage = ({ data }) => {
 
 updateMeter(ui, 0);
 updateLeaderboard(ui, []);
-ui.toastText.textContent = 'Live — gif this milk';
-ui.toast.classList.add('visible');
-setTimeout(() => ui.toast.classList.remove('visible'), 2000);
+if (ui.toastText) {
+  ui.toastText.textContent = 'Live — gif this milk';
+  ui.toast?.classList.add('visible');
+  setTimeout(() => ui.toast?.classList.remove('visible'), 2000);
+}

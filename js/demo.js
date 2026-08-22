@@ -85,17 +85,10 @@ document.querySelectorAll('[data-sim]').forEach((btn) => {
 });
 
 statusDot.style.background = '#4ade80';
-statusText.textContent = 'Live — tippe auf einen Button';
+statusText.textContent = 'Tippe einen Button ↓';
 renderMilks();
 updateMeter(previewUi, 0);
 updateLeaderboard(previewUi, []);
 broadcast('sync', { state: snapshotState() });
 
-const intro = [
-  ['gift-small', 800],
-  ['gift-medium', 2400],
-  ['gift-large', 4200],
-];
-intro.forEach(([key, delay]) => {
-  setTimeout(() => applyEvent(SIM_MAP[key]()), delay);
-});
+setTimeout(() => applyEvent(SIM_MAP['gift-small']()), 1200);

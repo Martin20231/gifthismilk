@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#09090f">
   <title>Gif This Milk — Overlay</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,14 +18,11 @@
         <p class="slogan">gif this milk</p>
       </header>
 
-      <div class="milk-machine">
-        <div class="machine-ambient"></div>
+      <div class="milk-scene">
         <div class="machine-body" id="machine">
-          <div class="machine-shine"></div>
           <div class="machine-brand">GTM</div>
           <div class="machine-tank">
             <div class="tank-liquid" id="tank-liquid"></div>
-            <div class="tank-bubbles"></div>
           </div>
           <div class="machine-panel">
             <span class="panel-light"></span>
@@ -45,11 +43,13 @@
         <div class="particles" id="particles"></div>
         <div class="float-layer" id="float-layer"></div>
         <div class="flash" id="flash"></div>
-        <div class="gif-card" id="gif-card">
-          <div class="gif-card-shine"></div>
-          <span class="gif-card-emoji" id="gif-emoji">🥛</span>
-          <span class="gif-card-title" id="gif-title">gif this milk</span>
-          <span class="gif-card-sub" id="gif-sub">ready to pour</span>
+      </div>
+
+      <div class="gif-banner" id="gif-banner">
+        <span class="gif-banner-emoji" id="gif-emoji">🥛</span>
+        <div class="gif-banner-text">
+          <span class="gif-banner-title" id="gif-title">Classic Milk</span>
+          <span class="gif-banner-sub" id="gif-sub">gif this milk</span>
         </div>
       </div>
 
@@ -71,7 +71,6 @@
       </div>
     </div>
   </div>
-
   <script type="module" src="js/overlay.js"></script>
 </body>
 </html>

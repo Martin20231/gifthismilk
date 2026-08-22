@@ -1,113 +1,28 @@
-const socket = io();
+import { CHANNEL_NAME } from './engine.js';
+import { bindOverlayUI, handleMilkEvent, updateLeaderboard, updateMeter } from './ui.js';
 
-const machine = document.getElementById('machine');
-const stream = document.getElementById('stream');
-const bottle = document.getElementById('bottle');
-const bottleEmoji = document.getElementById('bottle-emoji');
-const fountain = document.getElementById('fountain');
-const particles = document.getElementById('particles');
-const meterFill = document.getElementById('meter-fill');
-const toast = document.getElementById('toast');
-const toastText = document.getElementById('toast-text');
-const gifTag = document.getElementById('gif-tag');
-const leaderboardEl = document.getElementById('leaderboard');
+const ui = bindOverlayUI();
+const channel = new BroadcastChannel(CHANNEL_NAME);
 
-function updateMeter(level) {
-  meterFill.style.width = `${Math.min(100, level)}%`;
+if (new URLSearchParams(location.search).get('preview') === '1') {
+  document.body.classList.add('overlay-preview');
 }
 
-function updateLeaderboard(list) {
-  leaderboardEl.innerHTML = (list || [])
-    .slice(0, 5)
-    .map((e, i) => `<li>${i + 1}. @${e.user} — ${e.points} pts</li>`)
-    .join('') || '<li>Noch niemand…</li>';
-}
-
-function spawnParticles(count = 12) {
-  particles.innerHTML = '';
-  const cx = 210;
-  const cy = 90;
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const angle = (Math.PI * 2 * i) / count + Math.random();
-    const dist = 40 + Math.random() * 60;
-    p.style.left = `${cx}px`;
-    p.style.top = `${cy}px`;
-    p.style.setProperty('--tx', `${Math.cos(angle) * dist}px`);
-    p.style.setProperty('--ty', `${Math.sin(angle) * dist - 30}px`);
-    particles.appendChild(p);
+channel.onmessage = ({ data }) => {
+  if (data.type === 'sync') {
+    updateMeter(ui, data.state.milkLevel);
+    updateLeaderboard(ui, data.state.leaderboard);
+    return;
   }
-  setTimeout(() => { particles.innerHTML = ''; }, 900);
-}
-
-function playAnimation(type, milk) {
-  machine.classList.remove('shake', 'explode');
-  stream.classList.remove('active');
-  bottle.classList.remove('show');
-  fountain.classList.remove('active');
-
-  void machine.offsetWidth;
-
-  if (milk?.emoji) {
-    bottleEmoji.textContent = milk.emoji;
-    if (milk.color) {
-      bottle.style.background = `linear-gradient(180deg, transparent 30%, ${milk.color} 30%)`;
-    }
+  if (data.type === 'milk-event') {
+    handleMilkEvent(ui, data.event, data.state);
   }
+};
 
-  switch (type) {
-    case 'press':
-    case 'gift':
-    case 'unlock':
-      machine.classList.add('shake');
-      stream.classList.add('active');
-      setTimeout(() => {
-        stream.classList.remove('active');
-        bottle.classList.add('show');
-      }, 600);
-      break;
-    case 'explosion':
-    case 'legendary':
-      machine.classList.add('explode');
-      spawnParticles(20);
-      setTimeout(() => bottle.classList.add('show'), 400);
-      break;
-    case 'fountain':
-      fountain.classList.add('active');
-      spawnParticles(16);
-      break;
-    case 'bubble':
-      stream.classList.add('active');
-      setTimeout(() => stream.classList.remove('active'), 400);
-      break;
-    default:
-      bottle.classList.add('show');
-  }
+updateMeter(ui, 0);
+updateLeaderboard(ui, []);
+if (ui.toastText) {
+  ui.toastText.textContent = 'Live — gif this milk';
+  ui.toast?.classList.add('visible');
+  setTimeout(() => ui.toast?.classList.remove('visible'), 2000);
 }
-
-function showToast(event) {
-  toastText.textContent = event.message || 'Milch!';
-  gifTag.textContent = event.gifCaption || 'gif this milk';
-  if (event.isNewUnlock) {
-    gifTag.textContent = `✨ NEU: ${event.gifCaption}`;
-  }
-  toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 4000);
-}
-
-socket.on('state', (state) => {
-  updateMeter(state.milkLevel);
-  updateLeaderboard(state.leaderboard);
-});
-
-socket.on('milk-event', (event) => {
-  playAnimation(event.animation, event.milk);
-  showToast(event);
-});
-
-socket.on('connect', () => {
-  toastText.textContent = 'Live — gif this milk';
-  toast.classList.add('visible');
-  setTimeout(() => toast.classList.remove('visible'), 2000);
-});

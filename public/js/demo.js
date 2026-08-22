@@ -1,11 +1,16 @@
-const socket = io();
+import { CHANNEL_NAME, MILK_TYPES, createState, processEvent } from './engine.js';
+import { bindOverlayUI, handleMilkEvent, updateLeaderboard, updateMeter } from './ui.js';
+
+const channel = new BroadcastChannel(CHANNEL_NAME);
+const state = createState();
+const previewUi = bindOverlayUI('preview-');
 
 const statusDot = document.getElementById('status-dot');
 const statusText = document.getElementById('status-text');
 const milkCollection = document.getElementById('milk-collection');
 const overlayUrl = document.getElementById('overlay-url');
 
-overlayUrl.textContent = `${window.location.origin}/overlay.html`;
+overlayUrl.textContent = new URL('overlay.html', window.location.href).href;
 
 const SIM_USERS = ['milchfan42', 'tiktok_melker', 'rose_queen', 'chaos_cow', 'gif_master'];
 
@@ -14,7 +19,7 @@ function randomUser() {
 }
 
 const SIM_MAP = {
-  chat: () => ({ simulate: 'chat', user: randomUser(), action: 'press' }),
+  chat: () => ({ type: 'simulate', simulate: 'chat', user: randomUser(), action: 'press' }),
   like: () => ({ type: 'like', user: randomUser(), likeCount: 15 + Math.floor(Math.random() * 30) }),
   'gift-small': () => ({ type: 'gift', user: randomUser(), giftName: 'Rose', diamondCount: 1 }),
   'gift-medium': () => ({ type: 'gift', user: randomUser(), giftName: 'Finger Heart', diamondCount: 35 }),
@@ -23,52 +28,67 @@ const SIM_MAP = {
   fountain: () => ({ type: 'like', user: 'CROWD', likeCount: 500 }),
 };
 
+function snapshotState() {
+  return {
+    ...state,
+    leaderboard: [...state.leaderboard],
+    unlockedMilks: [...state.unlockedMilks],
+  };
+}
+
+function broadcast(type, payload) {
+  channel.postMessage({ type, ...payload });
+}
+
+function applyEvent(event) {
+  const result = processEvent(event, state);
+  handleMilkEvent(previewUi, result, state);
+  broadcast('milk-event', { event: result, state: snapshotState() });
+  renderMilks();
+  if (result.isNewUnlock) flashUnlock(result);
+  return result;
+}
+
+function renderMilks() {
+  milkCollection.innerHTML = MILK_TYPES.map((m) => {
+    const isUnlocked = state.unlockedMilks.includes(m.id);
+    return `<span class="milk-chip ${isUnlocked ? 'unlocked' : 'locked'}">${m.emoji}<br>${m.name}</span>`;
+  }).join('');
+}
+
+function flashUnlock(result) {
+  const chip = document.createElement('span');
+  chip.className = 'milk-chip unlocked';
+  chip.innerHTML = `✨<br>${result.milk?.emoji} ${result.milk?.name}`;
+  milkCollection.prepend(chip);
+  setTimeout(() => chip.remove(), 3200);
+}
+
+function ripple(btn, e) {
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const rippleEl = document.createElement('span');
+  rippleEl.className = 'btn-ripple';
+  rippleEl.style.width = rippleEl.style.height = `${size}px`;
+  rippleEl.style.left = `${e.clientX - rect.left - size / 2}px`;
+  rippleEl.style.top = `${e.clientY - rect.top - size / 2}px`;
+  btn.appendChild(rippleEl);
+  setTimeout(() => rippleEl.remove(), 600);
+}
+
 document.querySelectorAll('[data-sim]').forEach((btn) => {
-  btn.addEventListener('click', () => {
-    const key = btn.dataset.sim;
-    const payload = SIM_MAP[key]?.() || { simulate: key };
-    socket.emit('simulate', payload);
+  btn.addEventListener('click', (e) => {
+    ripple(btn, e);
+    const payload = SIM_MAP[btn.dataset.sim]?.() || { type: 'simulate', simulate: btn.dataset.sim };
+    applyEvent(payload);
   });
 });
 
-async function loadMilks() {
-  const res = await fetch('/api/milks');
-  const milks = await res.json();
-  return milks;
-}
+statusDot.style.background = '#4ade80';
+statusText.textContent = 'Tippe einen Button ↓';
+renderMilks();
+updateMeter(previewUi, 0);
+updateLeaderboard(previewUi, []);
+broadcast('sync', { state: snapshotState() });
 
-function renderMilks(unlocked) {
-  loadMilks().then((milks) => {
-    milkCollection.innerHTML = milks
-      .map((m) => {
-        const isUnlocked = unlocked.includes(m.id);
-        return `<span class="milk-chip ${isUnlocked ? 'unlocked' : 'locked'}">${m.emoji} ${m.name}</span>`;
-      })
-      .join('');
-  });
-}
-
-socket.on('connect', () => {
-  statusDot.style.background = '#4ade80';
-  statusText.textContent = 'Verbunden — Events gehen live ans Overlay';
-});
-
-socket.on('disconnect', () => {
-  statusDot.style.background = '#f87171';
-  statusText.textContent = 'Getrennt';
-});
-
-socket.on('state', (state) => {
-  renderMilks(state.unlockedMilks);
-});
-
-socket.on('milk-event', (event) => {
-  if (event.isNewUnlock) {
-    const chip = document.createElement('span');
-    chip.className = 'milk-chip unlocked';
-    chip.textContent = `✨ ${event.milk?.emoji} ${event.milk?.name} freigeschaltet!`;
-    chip.style.animation = 'pulse 0.5s ease 3';
-    milkCollection.prepend(chip);
-    setTimeout(() => chip.remove(), 3000);
-  }
-});
+setTimeout(() => applyEvent(SIM_MAP['gift-small']()), 1200);
