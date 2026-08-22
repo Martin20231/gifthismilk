@@ -67,33 +67,32 @@ function getProfile() {
   return resolveMilkProfile(selection.country, selection.gender, selection.sexuality);
 }
 
-function stepIndex() {
-  let n = 0;
-  if (selection.country) n = 1;
-  if (selection.gender) n = 2;
-  if (selection.sexuality) n = 3;
-  return n;
-}
-
-function renderSteps() {
-  const steps = ['Land', 'Geschmack', 'Aroma'];
-  const current = stepIndex();
-  return steps.map((label, i) => {
-    const num = i + 1;
-    const done = current >= num;
-    const active = current === num - 1 || (current === 0 && num === 1);
-    return `<div class="step-item ${done && current > num - 1 ? 'done' : active ? 'active' : ''}"><span class="step-dot">${done && current > num - 1 ? '✓' : num}</span><span>${label}</span></div>`;
-  }).join('');
-}
-
 function statusHtml() {
-  if (streamMode === 'live') {
-    return '<span class="conn-badge conn-live">🔴 Live — nur Likes & trinken aus TikTok</span>';
-  }
-  if (streamMode === 'connecting') {
-    return '<span class="conn-badge conn-wait">⏳ Verbinde…</span>';
-  }
-  return '<span class="conn-badge conn-demo">🧪 Demo-Modus — teste Like & trinken unten</span>';
+  if (streamMode === 'live') return '<div class="status status-live">🔴 TikTok Live verbunden</div>';
+  if (streamMode === 'connecting') return '<div class="status status-wait">Verbinde…</div>';
+  return '<div class="status status-demo">🧪 Demo — Like & trinken testen</div>';
+}
+
+function progressPct() {
+  let n = 0;
+  if (selection.country) n++;
+  if (selection.gender) n++;
+  if (selection.sexuality) n++;
+  return Math.round((n / 3) * 100);
+}
+
+function renderProgressBar() {
+  const pct = progressPct();
+  const left = 3 - (selection.country ? 1 : 0) - (selection.gender ? 1 : 0) - (selection.sexuality ? 1 : 0);
+  return `
+    <div class="progress-wrap">
+      <div class="progress-labels">
+        <span>${pct}% Mix</span>
+        <span>${isReady() ? '✓ Bereit' : `${left} offen`}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    </div>
+  `;
 }
 
 function render() {
@@ -101,74 +100,88 @@ function render() {
   const country = selection.country ? getCountry(selection.country) : null;
 
   app.innerHTML = `
-    <div class="shell ${gameActive ? 'is-game' : ''}">
+    <div class="app ${gameActive ? 'is-game' : ''}">
+
+      <header class="nav">
+        <div class="nav-brand">
+          <span class="nav-logo">🥛</span>
+          <div>
+            <strong>gif this milk</strong>
+            <small>Milch Builder</small>
+          </div>
+        </div>
+        ${!gameActive ? renderProgressBar() : '<span class="nav-mode">' + (streamMode === 'demo' ? 'DEMO' : 'LIVE') + '</span>'}
+      </header>
 
       <section class="screen setup" id="setup">
-        <header class="brand">
-          <div class="brand-icon">🥛</div>
-          <div class="brand-text">
-            <strong>gif this milk</strong>
-            <span>Live Milch Builder</span>
-          </div>
-        </header>
-
         <div class="hero">
-          <div class="hero-pill">🔴 TikTok Live</div>
-          <h1>Mix deine<br><em>Milch</em></h1>
-          <p class="hero-sub">Privat hier im Browser wählen · Live nur Like & trinken</p>
-          <div class="step-track">${renderSteps()}</div>
+          <span class="tag">TikTok Live Ready</span>
+          <h1>Stell deine <em>Milch</em> zusammen</h1>
+          <p class="sub">Privat wählen · Live nur Like &amp; trinken</p>
         </div>
 
-        <div class="privacy-box">
-          <span class="privacy-icon">🔒</span>
-          <div>
-            <strong>Deine Daten bleiben privat</strong>
-            <p>Land, Geschlecht & Sexualität werden nur auf deinem Gerät gespeichert — nicht im TikTok-Chat.</p>
+        <div class="info-grid">
+          <div class="info-card privacy">
+            <span>🔒</span>
+            <div>
+              <strong>Privat auf deinem Gerät</strong>
+              <p>Land, Geschlecht &amp; Sexualität — nie im TikTok-Chat.</p>
+            </div>
+          </div>
+          <div class="info-card live">
+            <span>💬</span>
+            <div>
+              <strong>TikTok steuert nur</strong>
+              <p><b>Like</b> füllt · Chat <b>trinken</b> leert</p>
+            </div>
           </div>
         </div>
 
-        <div class="bento">
-          <article class="bento-card card-land ${selection.country ? 'has-value' : ''}">
-            <div class="card-head">
-              <span class="card-num">01</span>
-              <div><h2>Land</h2><p>= Sorte</p></div>
-            </div>
+        <div class="selectors">
+          <article class="sel-card sel-land ${selection.country ? 'done' : ''}">
+            <header class="sel-head">
+              <span class="sel-num">1</span>
+              <div><h2>Land</h2><p>Sorte</p></div>
+              ${selection.country ? `<span class="sel-check">✓</span>` : ''}
+            </header>
             <div class="flag-grid" id="countries">
               ${COUNTRIES.map((c) => `
-                <button type="button" class="flag-tile ${selection.country === c.code ? 'selected' : ''}" data-country="${c.code}">
-                  <span class="flag-big">${c.flag}</span>
-                  <span class="flag-name">${esc(c.name)}</span>
+                <button type="button" class="pick ${selection.country === c.code ? 'on' : ''}" data-country="${c.code}">
+                  <span class="pick-icon">${c.flag}</span>
+                  <span class="pick-label">${esc(c.name)}</span>
                 </button>
               `).join('')}
             </div>
           </article>
 
-          <article class="bento-card card-gender ${selection.gender ? 'has-value' : ''}">
-            <div class="card-head">
-              <span class="card-num">02</span>
-              <div><h2>Geschlecht</h2><p>= Geschmack</p></div>
-            </div>
-            <div class="gender-row" id="genders">
+          <article class="sel-card sel-gender ${selection.gender ? 'done' : ''}">
+            <header class="sel-head">
+              <span class="sel-num">2</span>
+              <div><h2>Geschlecht</h2><p>Geschmack</p></div>
+              ${selection.gender ? `<span class="sel-check">✓</span>` : ''}
+            </header>
+            <div class="pick-row" id="genders">
               ${GENDER_OPTIONS.map((g) => `
-                <button type="button" class="gender-tile ${selection.gender === g.id ? 'selected' : ''}" data-gender="${g.id}">
-                  <span class="gender-emoji">${g.icon}</span>
-                  <span class="gender-label">${esc(g.label)}</span>
+                <button type="button" class="pick pick-lg ${selection.gender === g.id ? 'on' : ''}" data-gender="${g.id}">
+                  <span class="pick-icon">${g.icon}</span>
+                  <span class="pick-label">${esc(g.label)}</span>
                 </button>
               `).join('')}
             </div>
           </article>
 
-          <article class="bento-card card-aroma ${selection.sexuality ? 'has-value' : ''}">
-            <div class="card-head">
-              <span class="card-num">03</span>
-              <div><h2>Sexualität</h2><p>= Aroma</p></div>
-            </div>
+          <article class="sel-card sel-aroma ${selection.sexuality ? 'done' : ''}">
+            <header class="sel-head">
+              <span class="sel-num">3</span>
+              <div><h2>Sexualität</h2><p>Aroma</p></div>
+              ${selection.sexuality ? `<span class="sel-check">✓</span>` : ''}
+            </header>
             <div class="aroma-grid" id="sexualities">
               ${getSexualityOptions().map((o) => `
-                <button type="button" class="aroma-tile ${selection.sexuality === o.label ? 'selected' : ''}" data-sexuality="${esc(o.label)}">
-                  <span class="aroma-emoji">${SEXUALITY_EMOJI[o.label] ?? '🌈'}</span>
-                  <span class="aroma-name">${esc(o.label)}</span>
-                  <span class="aroma-flavor">${esc(o.aroma)}</span>
+                <button type="button" class="pick pick-aroma ${selection.sexuality === o.label ? 'on' : ''}" data-sexuality="${esc(o.label)}">
+                  <span class="pick-icon">${SEXUALITY_EMOJI[o.label] ?? '🌈'}</span>
+                  <span class="pick-label">${esc(o.label)}</span>
+                  <span class="pick-sub">${esc(o.aroma)}</span>
                 </button>
               `).join('')}
             </div>
@@ -176,89 +189,62 @@ function render() {
         </div>
 
         ${profile && country ? `
-          <div class="milk-card">
-            <div class="milk-card-glow"></div>
-            <div class="milk-card-inner">
-              <span class="milk-card-label">Dein Mix — nur lokal 🔒</span>
-              <div class="milk-card-title">${country.flag} ${esc(country.sorte)}</div>
-              <div class="milk-card-tags">
-                <span>⚧️ ${esc(profile.taste)}</span>
-                <span>🌈 ${esc(profile.aroma)}</span>
-              </div>
+          <div class="result-card">
+            <p class="result-tag">Dein Mix · nur lokal 🔒</p>
+            <h3>${country.flag} ${esc(country.sorte)}</h3>
+            <div class="result-chips">
+              <span>⚧️ ${esc(profile.taste)}</span>
+              <span>🌈 ${esc(profile.aroma)}</span>
             </div>
           </div>
         ` : ''}
-
-        <div class="chat-help">
-          <h3>💬 TikTok Live (öffentlich)</h3>
-          <div class="chat-cmds">
-            <code>❤️ Like</code>
-            <code>trinken</code>
-          </div>
-          <p class="chat-help-note">Nur das Glas steuern — keine persönlichen Daten im Chat.</p>
-        </div>
-
-        <div class="fab-wrap">
-          <button type="button" class="fab-start ${isReady() ? 'ready' : ''}" id="start-game" ${isReady() ? '' : 'disabled'}>
-            <span class="fab-text">Spiel starten</span>
-            <span class="fab-arrow">→</span>
-          </button>
-        </div>
       </section>
 
       <section class="screen game" id="game">
-        <div class="live-phone">
-          <div class="live-phone-notch"></div>
-          <header class="live-top">
-            <button type="button" class="live-back" id="back-setup">← Mix</button>
-            <div class="live-brand">gif this milk</div>
-            <span class="live-dot">${streamMode === 'demo' ? 'DEMO' : 'LIVE'}</span>
-          </header>
+        <div class="game-card">
+          <div class="game-top">
+            <button type="button" class="btn-ghost" id="back-setup">← Zurück</button>
+            <span class="badge-live">${streamMode === 'demo' ? 'DEMO' : 'LIVE'}</span>
+          </div>
 
           ${statusHtml()}
 
           ${profile && country ? `
-            <div class="live-tags private-tags">
-              <span>${country.flag} ${esc(country.sorte)}</span>
-              <span>⚧️ ${esc(profile.taste)}</span>
-              <span>🌈 ${esc(profile.aroma)}</span>
-              <span class="private-badge">🔒 nur du</span>
+            <div class="your-mix">
+              <span class="mix-lock">🔒</span>
+              ${country.flag} ${esc(country.sorte)} · ${esc(profile.taste)} · ${esc(profile.aroma)}
             </div>
           ` : ''}
 
-          <div class="live-rules">
-            <div class="rule"><span>❤️</span> Like füllt Glas</div>
-            <div class="rule"><span>💬</span> Chat: <strong>trinken</strong></div>
-          </div>
-
-          <div class="live-stage">
-            <div class="dispenser">
-              <div class="dispenser-body"><div class="dispenser-window"></div><div class="dispenser-spout"></div></div>
-              <div class="pour ${streamState.pouring ? 'active' : ''}"></div>
+          <div class="stage">
+            <div class="machine">
+              <div class="machine-box"><div class="machine-fluid"></div></div>
+              <div class="stream ${streamState.pouring ? 'on' : ''}"></div>
             </div>
-            <div class="glass-zone">
-              <div class="glass ${streamState.drinking ? 'drinking' : ''}">
-                <div class="glass-fill" style="height:${streamState.fill}%"></div>
-                <div class="glass-glare"></div>
+            <div class="glass-box">
+              <div class="glass ${streamState.drinking ? 'shake' : ''}">
+                <div class="glass-milk" style="height:${streamState.fill}%"></div>
               </div>
-              <div class="fill-bar"><div class="fill-bar-inner" style="width:${streamState.fill}%"></div></div>
-              <p class="fill-text">${streamState.fill >= 100 ? '🥛 Voll — trinken!' : `${Math.round(streamState.fill)}% im Glas`}</p>
-              <p class="fill-meta">❤️ ${streamState.likes} Likes · 🥤 ${streamState.drunk}× getrunken</p>
+              <div class="meter"><div class="meter-fill" style="width:${streamState.fill}%"></div></div>
+              <p class="meter-label">${streamState.fill >= 100 ? '🥛 Voll — trinken!' : `${Math.round(streamState.fill)}%`}</p>
+              <p class="meter-stats">❤️ ${streamState.likes} · 🥤 ${streamState.drunk}×</p>
             </div>
           </div>
 
-          <div class="live-toast ${streamState.toast ? 'show' : ''}">${esc(streamState.toast || '')}</div>
+          <div class="toast ${streamState.toast ? 'show' : ''}">${esc(streamState.toast || '')}</div>
 
-          <div class="live-actions">
-            <button type="button" class="btn-like" id="demo-like">❤️ Demo-Like</button>
-            <button type="button" class="btn-drink ${streamState.fill >= 100 ? 'show' : ''}" id="demo-drink">💬 Demo: trinken</button>
+          <div class="game-actions">
+            <button type="button" class="btn-like" id="demo-like">❤️ Like testen</button>
+            <button type="button" class="btn-drink ${streamState.fill >= 100 ? 'show' : ''}" id="demo-drink">🥤 trinken</button>
           </div>
-
-          <p class="live-hint">${streamMode === 'live'
-    ? 'Live: TikTok-Likes + Chat „trinken“ — Demo-Buttons zum Testen'
-    : 'Demo-Modus — teste Like & trinken. Auswahl bleibt auf deinem Gerät.'}</p>
         </div>
       </section>
+
+      <footer class="dock">
+        <button type="button" class="btn-go ${isReady() ? 'ready' : ''}" id="start-game" ${isReady() ? '' : 'disabled'}>
+          Spiel starten →
+        </button>
+      </footer>
     </div>
   `;
 
