@@ -1,11 +1,11 @@
 import {
   COUNTRIES,
   GENDER_OPTIONS,
-  findProfile,
   getCountry,
   getSexualityOptions,
   getStreamState,
   resetStreamState,
+  resolveMilkProfile,
   saveStreamState,
 } from './data.js';
 
@@ -26,18 +26,13 @@ function esc(str) {
   return d.innerHTML;
 }
 
-function sexualityOptions() {
-  if (!selection.country || !selection.gender) return [];
-  return getSexualityOptions(selection.country, selection.gender);
-}
-
 function isReady() {
   return selection.country && selection.gender && selection.sexuality;
 }
 
 function getProfile() {
   if (!isReady()) return null;
-  return findProfile(selection.country, selection.gender, selection.sexuality);
+  return resolveMilkProfile(selection.country, selection.gender, selection.sexuality);
 }
 
 function render() {
@@ -79,12 +74,12 @@ function render() {
         <div class="selector-block ${selection.gender ? '' : 'disabled'}">
           <h2>🌈 Sexualität <span class="hint">= Aroma</span></h2>
           <div class="chip-list" id="sexualities">
-            ${selection.gender ? (sexualityOptions().length ? sexualityOptions().map((p) => `
-              <button type="button" class="chip-row ${selection.sexuality === p.sexuality ? 'selected' : ''}" data-sexuality="${esc(p.sexuality)}">
-                <strong>${esc(p.sexuality)}</strong>
-                <span>${esc(p.aroma)} · ${esc(p.taste)}</span>
+            ${selection.gender ? getSexualityOptions().map((o) => `
+              <button type="button" class="chip-row ${selection.sexuality === o.label ? 'selected' : ''}" data-sexuality="${esc(o.label)}">
+                <strong>${esc(o.label)}</strong>
+                <span>${esc(o.aroma)}</span>
               </button>
-            `).join('') : '<p class="empty-msg">Keine Option für diese Kombination.</p>') : '<p class="empty-msg">Zuerst Land und Geschlecht wählen.</p>'}
+            `).join('') : '<p class="empty-msg">Zuerst Land und Geschlecht wählen.</p>'}
           </div>
         </div>
 

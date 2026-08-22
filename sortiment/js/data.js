@@ -10,6 +10,23 @@ export const GENDER_OPTIONS = [
   { id: 'divers', label: 'Divers', icon: '🧑', desc: 'Diverses Geschmacksprofil' },
 ];
 
+export const SEXUALITY_OPTIONS = [
+  { id: 'heterosexuell', label: 'Heterosexuell', aroma: 'Vanille & Honig' },
+  { id: 'schwul', label: 'Schwul', aroma: 'Minze & Zitrone' },
+  { id: 'lesbisch', label: 'Lesbisch', aroma: 'Bergkräuter & Thymian' },
+  { id: 'bisexuell', label: 'Bisexuell', aroma: 'Karamell & Meersalz' },
+  { id: 'pansexuell', label: 'Pansexuell', aroma: 'Lavendel & Pfirsich' },
+  { id: 'asexuell', label: 'Asexuell', aroma: 'Reine Milchnote' },
+  { id: 'demisexuell', label: 'Demisexuell', aroma: 'Gouda & Kräuter' },
+  { id: 'queer', label: 'Queer', aroma: 'Stroh & Linde' },
+];
+
+const GENDER_TASTE = {
+  frauen: 'Sanft & mild',
+  maenner: 'Kräftig & würzig',
+  divers: 'Vielseitig & leicht',
+};
+
 export const COUNTRIES = [
   { code: 'de', name: 'Deutschland', flag: '🇩🇪', sorte: 'Alpen-Milch' },
   { code: 'at', name: 'Österreich', flag: '🇦🇹', sorte: 'Almen-Milch' },
@@ -63,14 +80,42 @@ export function getProfilesForSelection(country, genderKey) {
   return PROFILES.filter((p) => p.country === country && matchGender(p, genderKey));
 }
 
-export function getSexualityOptions(country, genderKey) {
-  return getProfilesForSelection(country, genderKey);
+export function getSexualityOptions() {
+  return SEXUALITY_OPTIONS;
 }
 
 export function findProfile(country, genderKey, sexuality) {
   return PROFILES.find(
     (p) => p.country === country && matchGender(p, genderKey) && p.sexuality === sexuality,
   );
+}
+
+function getTasteFor(country, genderKey) {
+  const peers = getProfilesForSelection(country, genderKey);
+  if (peers.length) return peers[0].taste;
+  return GENDER_TASTE[genderKey] ?? 'Ausgewogen';
+}
+
+function getAromaForSexuality(sexuality) {
+  const option = SEXUALITY_OPTIONS.find((o) => o.label === sexuality);
+  return option?.aroma ?? 'Reine Milchnote';
+}
+
+export function resolveMilkProfile(country, genderKey, sexuality) {
+  const existing = findProfile(country, genderKey, sexuality);
+  if (existing) return existing;
+
+  const countryData = getCountry(country);
+  const genderData = getGenderOption(genderKey);
+  return {
+    id: `${country}-${genderKey}-${sexuality}`,
+    country,
+    gender: genderData?.label ?? genderKey,
+    sexuality,
+    taste: getTasteFor(country, genderKey),
+    aroma: getAromaForSexuality(sexuality),
+    sorte: countryData?.sorte ?? 'Milch',
+  };
 }
 
 export function saveSelection(data) {
