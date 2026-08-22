@@ -10,8 +10,7 @@ const statusText = document.getElementById('status-text');
 const milkCollection = document.getElementById('milk-collection');
 const overlayUrl = document.getElementById('overlay-url');
 
-const base = new URL('.', window.location.href);
-overlayUrl.textContent = new URL('overlay.html', base).href;
+overlayUrl.textContent = new URL('overlay.html', window.location.href).href;
 
 const SIM_USERS = ['milchfan42', 'tiktok_melker', 'rose_queen', 'chaos_cow', 'gif_master'];
 
@@ -41,13 +40,9 @@ function broadcast(type, payload) {
   channel.postMessage({ type, ...payload });
 }
 
-function showOnPreview(result) {
-  handleMilkEvent(previewUi, result, state);
-}
-
 function applyEvent(event) {
   const result = processEvent(event, state);
-  showOnPreview(result);
+  handleMilkEvent(previewUi, result, state);
   broadcast('milk-event', { event: result, state: snapshotState() });
   renderMilks();
   if (result.isNewUnlock) flashUnlock(result);
@@ -57,30 +52,50 @@ function applyEvent(event) {
 function renderMilks() {
   milkCollection.innerHTML = MILK_TYPES.map((m) => {
     const isUnlocked = state.unlockedMilks.includes(m.id);
-    return `<span class="milk-chip ${isUnlocked ? 'unlocked' : 'locked'}">${m.emoji} ${m.name}</span>`;
+    return `<span class="milk-chip ${isUnlocked ? 'unlocked' : 'locked'}">${m.emoji}<br>${m.name}</span>`;
   }).join('');
 }
 
 function flashUnlock(result) {
   const chip = document.createElement('span');
   chip.className = 'milk-chip unlocked';
-  chip.textContent = `✨ ${result.milk?.emoji} ${result.milk?.name} freigeschaltet!`;
+  chip.innerHTML = `✨<br>${result.milk?.emoji} ${result.milk?.name}`;
   milkCollection.prepend(chip);
-  setTimeout(() => chip.remove(), 3000);
+  setTimeout(() => chip.remove(), 3200);
+}
+
+function ripple(btn, e) {
+  const rect = btn.getBoundingClientRect();
+  const size = Math.max(rect.width, rect.height);
+  const rippleEl = document.createElement('span');
+  rippleEl.className = 'btn-ripple';
+  rippleEl.style.width = rippleEl.style.height = `${size}px`;
+  rippleEl.style.left = `${e.clientX - rect.left - size / 2}px`;
+  rippleEl.style.top = `${e.clientY - rect.top - size / 2}px`;
+  btn.appendChild(rippleEl);
+  setTimeout(() => rippleEl.remove(), 600);
 }
 
 document.querySelectorAll('[data-sim]').forEach((btn) => {
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', (e) => {
+    ripple(btn, e);
     const payload = SIM_MAP[btn.dataset.sim]?.() || { type: 'simulate', simulate: btn.dataset.sim };
     applyEvent(payload);
   });
 });
 
 statusDot.style.background = '#4ade80';
-statusText.textContent = 'Live-Vorschau aktiv — einfach Buttons drücken';
+statusText.textContent = 'Live — tippe auf einen Button';
 renderMilks();
 updateMeter(previewUi, 0);
 updateLeaderboard(previewUi, []);
 broadcast('sync', { state: snapshotState() });
 
-setTimeout(() => applyEvent(SIM_MAP['gift-small']()), 900);
+const intro = [
+  ['gift-small', 800],
+  ['gift-medium', 2400],
+  ['gift-large', 4200],
+];
+intro.forEach(([key, delay]) => {
+  setTimeout(() => applyEvent(SIM_MAP[key]()), delay);
+});
