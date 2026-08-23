@@ -24,16 +24,16 @@ Bei jedem Push auf `main` baut Netlify automatisch neu.
 
 ---
 
-## Option B — Cloudflare Pages (über GitHub, automatisch)
+## Option B — Cloudflare Pages (~5 Minuten)
 
 1. Kostenlos anmelden: **https://dash.cloudflare.com/sign-up**
-2. **My Profile → API Tokens → Create Token**
-   - Rechte: **Cloudflare Pages: Edit**
-3. **Account ID** kopieren (Dashboard rechts)
-4. Im GitHub-Repo: **Settings → Secrets and variables → Actions → New repository secret**
-   - `CLOUDFLARE_API_TOKEN` = dein Token
-   - `CLOUDFLARE_ACCOUNT_ID` = deine Account-ID
-5. Push auf `main` (oder Actions → „Deploy to Cloudflare Pages“ manuell starten)
+2. **Workers & Pages → Create → Pages → Connect to Git**
+3. Repo **Martin20231/gifthismilk** wählen
+4. Build settings:
+   - **Production branch:** `main`
+   - **Build command:** leer
+   - **Build output directory:** `docs`
+5. Deploy → Projektname: `gifthismilk`
 6. Link: **https://gifthismilk.pages.dev**
 
 ---
