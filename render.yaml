@@ -1,0 +1,7 @@
+# Render Static Site — kostenlos: gifthismilk.onrender.com
+services:
+  - type: web
+    name: gifthismilk
+    runtime: static
+    staticPublishPath: ./docs
+    buildCommand: echo "Static deploy"

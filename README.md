@@ -4,6 +4,13 @@ TikTok Live Milch-Automat — interaktiv, meme-tauglich, OBS-ready.
 
 **Live Demo:** https://martin20231.github.io/gifthismilk/
 
+## Eigener Link (ohne „Martin“ in der URL)
+
+Die App kann kostenlos unter z.B. **gifthismilk.netlify.app** laufen — Code bleibt auf GitHub.
+
+→ Anleitung: [HOSTING.md](./HOSTING.md)  
+→ Schnellstart: [Netlify Deploy](https://app.netlify.com/start/deploy?repository=https://github.com/Martin20231/gifthismilk)
+
 ## GitHub Pages (Demo)
 
 1. Repo → **Settings** → **Pages**

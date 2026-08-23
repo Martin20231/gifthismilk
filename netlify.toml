@@ -1,0 +1,13 @@
+# Netlify — kostenlos, eigener Link z.B. gifthismilk.netlify.app
+[build]
+  publish = "docs"
+  command = "echo 'Static site — no build needed'"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
