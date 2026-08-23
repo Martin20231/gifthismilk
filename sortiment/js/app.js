@@ -2,11 +2,14 @@ import {
   COUNTRIES,
   GENDER_OPTIONS,
   getCountry,
+  getProfileById,
   getSexualityOptions,
   getSelection,
+  profileToSelection,
   resolveMilkProfile,
   saveSelection,
 } from './data.js';
+import { appLink } from '../../shared/js/base.js';
 import {
   connectStream,
   startLiveSession,
@@ -35,6 +38,12 @@ const selection = {
   gender: saved?.gender ?? null,
   sexuality: saved?.sexuality ?? null,
 };
+
+const urlProfile = new URLSearchParams(location.search).get('profil');
+if (urlProfile) {
+  const fromUrl = getProfileById(urlProfile);
+  if (fromUrl) Object.assign(selection, profileToSelection(fromUrl));
+}
 
 let gameActive = false;
 let streamState = {
@@ -103,13 +112,13 @@ function render() {
     <div class="app ${gameActive ? 'is-game' : ''}">
 
       <header class="nav">
-        <div class="nav-brand">
+        <a class="nav-brand" href="${appLink('/')}">
           <span class="nav-logo">🥛</span>
           <div>
             <strong>gif this milk</strong>
             <small>Milch Builder</small>
           </div>
-        </div>
+        </a>
         ${!gameActive ? renderProgressBar() : '<span class="nav-mode">' + (streamMode === 'demo' ? 'DEMO' : 'LIVE') + '</span>'}
       </header>
 

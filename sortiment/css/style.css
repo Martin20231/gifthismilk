@@ -71,7 +71,7 @@ body { font-family: var(--font); background: var(--bg); color: var(--ink); min-h
   border-bottom: 1px solid var(--line);
 }
 
-.nav-brand { display: flex; align-items: center; gap: 10px; }
+.nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: inherit; }
 .nav-logo {
   width: 42px; height: 42px; border-radius: 14px;
   background: linear-gradient(135deg, var(--pink), var(--pink-strong));
