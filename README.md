@@ -12,8 +12,11 @@ TikTok Live Milch-Automat — interaktiv, meme-tauglich, OBS-ready.
 
 | Seite | URL |
 |-------|-----|
-| Demo | `/` |
+| **Landing** | `/` |
+| Länder entdecken | `/discover/` |
+| Match (Swipe) | `/match/` |
 | Sortiment (Milch-Mix + Live-Glas) | `/sortiment/` |
+| Stream-Demo (OBS) | `/demo/` |
 | OBS-Overlay | `/overlay.html` |
 
 > Pages = Browser-Demo ohne Server. **TikTok Live Sync** braucht `npm start` lokal oder einen gehosteten Server.
