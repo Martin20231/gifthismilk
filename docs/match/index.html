@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#ffc5d3">
+  <title>Match — Gif This Milk</title>
+  <script>
+    if (location.hostname.includes('github.io')) {
+      var b = document.createElement('base');
+      var p = location.pathname;
+      b.href = p.endsWith('/') ? p : p.replace(/\/[^/]*$/, '/');
+      document.head.appendChild(b);
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/css/theme.css?v=16">
+  <link rel="stylesheet" href="css/style.css?v=16">
+</head>
+<body>
+  <div class="bg-blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="blob blob-3"></div>
+  </div>
+  <div id="app"></div>
+  <script type="module" src="js/app.js?v=16"></script>
+</body>
+</html>

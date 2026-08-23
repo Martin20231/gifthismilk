@@ -1,0 +1,64 @@
+.hero { text-align: center; padding: 28px 0 32px; }
+.hero h1 {
+  font-family: var(--display);
+  font-size: clamp(2.2rem, 9vw, 3.2rem);
+  font-weight: 800; line-height: 1.05;
+  letter-spacing: -0.03em; margin: 14px 0 10px;
+}
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(120deg, var(--pink-strong), var(--pink-deep));
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.hero-sub { font-size: 0.95rem; color: var(--muted); max-width: 340px; margin: 0 auto 24px; }
+
+.hero-actions {
+  display: flex; flex-direction: column; gap: 10px;
+  max-width: 320px; margin: 0 auto;
+}
+.hero-actions .btn { width: 100%; }
+
+.steps { margin-bottom: 24px; }
+.step-grid { display: flex; flex-direction: column; gap: 10px; }
+.step { padding: 16px; position: relative; overflow: hidden; }
+.step-num {
+  display: inline-grid; place-items: center;
+  width: 28px; height: 28px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--pink), var(--pink-strong));
+  font-family: var(--display); font-size: 0.75rem; font-weight: 800;
+  margin-bottom: 8px;
+}
+.step h3 { font-size: 0.95rem; font-weight: 800; margin-bottom: 4px; }
+.step p { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
+.step strong { color: var(--ink); }
+
+.preview {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px; margin-bottom: 24px;
+}
+.preview-visual {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  font-size: 0.72rem; font-weight: 800; color: var(--pink-deep); flex-shrink: 0;
+}
+.mini-glass {
+  width: 44px; height: 56px; border: 2px solid rgba(var(--pink-rgb), 0.5);
+  border-radius: 4px 4px 14px 14px; overflow: hidden; position: relative;
+  background: rgba(255,255,255,0.6);
+}
+.mini-fill {
+  position: absolute; bottom: 0; left: 0; right: 0; height: 72%;
+  background: linear-gradient(180deg, var(--pink-soft), var(--pink));
+  animation: fill-pulse 2.5s ease-in-out infinite;
+}
+@keyframes fill-pulse { 50% { height: 85%; } }
+
+.landing-footer {
+  text-align: center; padding-bottom: 12px;
+  font-size: 0.75rem; color: var(--muted); font-weight: 600;
+}
+.footer-link { color: var(--pink-deep); text-decoration: none; font-weight: 700; }
+.footer-link:hover { text-decoration: underline; }
+
+@media (min-width: 480px) {
+  .step-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+}
