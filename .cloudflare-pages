@@ -1,0 +1,4 @@
+# Cloudflare Pages — statische Seite
+# Build output directory: docs
+# Build command: (leer)
+# Kein wrangler.toml im Root — sonst erkennt Cloudflare fälschlich ein Worker-Projekt.

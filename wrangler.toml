@@ -1,6 +1,0 @@
-name = "gifthismilk"
-compatibility_date = "2024-08-23"
-
-# Statische Webseite aus docs/ (Worker-Fallback, wenn Pages nicht verfügbar)
-[assets]
-directory = "./docs"
