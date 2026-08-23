@@ -1,0 +1,49 @@
+.demo-shell { padding-bottom: 32px; }
+
+.demo-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.demo-card {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.demo-icon { font-size: 1.75rem; }
+.demo-card h2 { font-size: 1rem; font-weight: 800; }
+.demo-card p { font-size: 0.82rem; color: var(--muted); font-weight: 600; line-height: 1.45; }
+.demo-card .btn { margin-top: 6px; width: 100%; }
+
+.url-box, .rules-box { padding: 16px; margin-bottom: 12px; }
+.url-title { font-size: 0.95rem; font-weight: 800; margin-bottom: 8px; }
+.url-hint { font-size: 0.75rem; color: var(--muted); font-weight: 600; line-height: 1.45; margin-top: 8px; }
+.url-code, .code-block {
+  display: block;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--pink-bg);
+  font-size: 0.72rem;
+  font-weight: 700;
+  word-break: break-all;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.code-block { white-space: pre-wrap; font-family: ui-monospace, monospace; }
+
+.rules-list {
+  list-style: none;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.rules-list strong { color: var(--ink); }
+
+@media (min-width: 520px) {
+  .demo-grid { grid-template-columns: 1fr 1fr; }
+}

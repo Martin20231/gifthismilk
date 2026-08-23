@@ -1,0 +1,50 @@
+body.obs-overlay {
+  margin: 0;
+  min-height: 100vh;
+  background: transparent;
+  font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+.overlay-shell {
+  max-width: 360px;
+  margin: 0 auto;
+  padding: 12px;
+}
+
+.overlay-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+.overlay-brand strong {
+  font-family: 'Syne', system-ui, sans-serif;
+  text-transform: lowercase;
+}
+
+.overlay-badge {
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #e895a8;
+  color: #fff;
+}
+
+.overlay-badge.live { background: #059669; }
+
+.overlay-stage {
+  background: rgba(255, 249, 251, 0.92);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 197, 211, 0.5);
+  box-shadow: 0 8px 32px rgba(18, 16, 26, 0.12);
+}
+
+.obs-overlay .toast {
+  margin-top: 10px;
+  opacity: 1;
+}

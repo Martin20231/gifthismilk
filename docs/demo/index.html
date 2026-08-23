@@ -3,114 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#09090f">
-  <title>Stream-Demo — Gif This Milk</title>
+  <meta name="theme-color" content="#ffc5d3">
+  <title>Live &amp; OBS — Gif This Milk</title>
+  <script>
+    if (location.pathname.includes('/demo/')) {
+      var b = document.createElement('base');
+      b.href = location.pathname.endsWith('/') ? location.pathname : location.pathname + '/';
+      document.head.appendChild(b);
+    }
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/styles.css?v=3">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../shared/css/theme.css?v=17">
+  <link rel="stylesheet" href="css/style.css?v=17">
 </head>
-<body class="demo-bg">
-  <main class="demo-page">
-    <header class="hero">
-      <div class="hero-badge"><span class="status-dot" id="status-dot"></span> <span id="status-text">Live-Demo</span></div>
-      <h1>Gif This Milk</h1>
-      <p class="tagline">gif this milk</p>
+<body>
+  <div class="bg-blobs" aria-hidden="true">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+  </div>
+
+  <div class="shell demo-shell">
+    <header class="nav">
+      <a class="nav-brand" href="../">
+        <span class="nav-logo">🥛</span>
+        <div><strong>gif this milk</strong><small>Live &amp; OBS</small></div>
+      </a>
+      <nav class="nav-links">
+        <a class="nav-link" href="../sortiment/">Spiel</a>
+      </nav>
     </header>
 
-    <section class="demo-section">
-      <h2>Stream-Vorschau</h2>
-      <div class="phone-shell">
-        <div class="phone-notch"></div>
-        <div class="phone-label">TikTok Live</div>
-        <div class="overlay-wrap">
-          <div class="overlay-card" id="preview-card">
-            <header class="overlay-header">
-              <h1>Gif This Milk</h1>
-              <p class="slogan">gif this milk</p>
-            </header>
+    <h1 class="section-title">TikTok Live &amp; Stream</h1>
+    <p class="section-sub">Aktuelles Setup — Like füllt das Glas, Chat <strong>trinken</strong> leert es. Profil bleibt privat im Browser.</p>
 
-            <div class="milk-scene">
-              <div class="machine-body" id="preview-machine">
-                <div class="machine-window">
-                  <div class="tank-liquid" id="preview-tank-liquid"></div>
-                  <span class="machine-icon" aria-hidden="true">🥛</span>
-                </div>
-                <div class="machine-label">MILCH-O-MAT</div>
-                <div class="machine-panel">
-                  <span class="panel-light"></span>
-                  <span class="panel-light delay"></span>
-                  <span class="panel-light delay2"></span>
-                </div>
-                <div class="machine-nozzle">
-                  <div class="milk-stream" id="preview-stream"></div>
-                </div>
-              </div>
-              <div class="milk-bottle" id="preview-bottle">
-                <div class="bottle-glass">
-                  <div class="bottle-liquid" id="preview-bottle-liquid"></div>
-                </div>
-                <span class="emoji" id="preview-bottle-emoji">🥛</span>
-              </div>
-              <div class="milk-fountain" id="preview-fountain"></div>
-              <div class="particles" id="preview-particles"></div>
-              <div class="float-layer" id="preview-float-layer"></div>
-              <div class="flash" id="preview-flash"></div>
-            </div>
+    <div class="demo-grid">
+      <article class="card demo-card">
+        <span class="demo-icon">🧪</span>
+        <h2>Im Browser testen</h2>
+        <p>Sortiment wählen, Spiel starten, Like &amp; trinken mit Demo-Buttons — ohne Server.</p>
+        <a class="btn btn-primary" href="../sortiment/">Spiel öffnen</a>
+      </article>
 
-            <div class="gif-banner" id="preview-gif-banner" hidden>
-              <span class="gif-banner-emoji" id="preview-gif-emoji"></span>
-              <div class="gif-banner-text">
-                <span class="gif-banner-title" id="preview-gif-title"></span>
-                <span class="gif-banner-sub" id="preview-gif-sub"></span>
-              </div>
-            </div>
+      <article class="card demo-card">
+        <span class="demo-icon">📺</span>
+        <h2>OBS-Overlay</h2>
+        <p>Nur das Live-Glas für deinen Stream — keine privaten Daten sichtbar.</p>
+        <a class="btn btn-ghost" href="../overlay.html" target="_blank" rel="noopener">Overlay öffnen</a>
+      </article>
+    </div>
 
-            <div class="milk-meter">
-              <label><span>Milch-Level</span><span id="preview-meter-label">0%</span></label>
-              <div class="meter-track">
-                <div class="meter-fill" id="preview-meter-fill"></div>
-              </div>
-            </div>
-
-            <div class="event-toast visible" id="preview-toast">
-              <span id="preview-toast-text">Tippe 🌹 Rose unten</span>
-              <div class="gif-tag" id="preview-gif-tag">gif this milk</div>
-            </div>
-
-            <div class="leaderboard-mini">
-              <strong>Top Melker</strong>
-              <ol id="preview-leaderboard"><li>Noch niemand…</li></ol>
-            </div>
-          </div>
-        </div>
-      </div>
-      <p class="preview-hint">So erscheint es im TikTok-Stream.</p>
+    <section class="card url-box">
+      <h2 class="url-title">OBS Browser-Quelle</h2>
+      <p class="url-hint">URL in OBS einfügen (Breite ~420, Höhe ~520, Hintergrund transparent):</p>
+      <code id="overlay-url" class="url-code"></code>
+      <p class="url-hint">Mit Backend-Server: <code>?server=https://dein-server.de</code> anhängen.</p>
     </section>
 
-    <section class="demo-section">
-      <h2>Events testen</h2>
-      <div class="btn-grid">
-        <button class="btn" data-sim="chat">💬 !milch</button>
-        <button class="btn" data-sim="like">❤️ Likes</button>
-        <button class="btn" data-sim="gift-small">🌹 Rose</button>
-        <button class="btn" data-sim="gift-medium">💖 Heart</button>
-        <button class="btn" data-sim="gift-large">💎 Universe</button>
-        <button class="btn" data-sim="follow">➕ Follow</button>
-        <button class="btn btn-primary" data-sim="fountain">🌊 Fontäne</button>
-      </div>
+    <section class="card rules-box">
+      <h2 class="url-title">So steuert TikTok das Spiel</h2>
+      <ul class="rules-list">
+        <li><strong>Like</strong> → Glas füllt sich für alle Zuschauer</li>
+        <li>Chat <strong>trinken</strong> → Glas leeren (wenn voll)</li>
+        <li>Land, Geschlecht, Sexualität → <strong>nur lokal</strong>, nie im Chat</li>
+      </ul>
     </section>
 
-    <section class="demo-section">
-      <h2>Milch-Sammlung</h2>
-      <div class="milk-collection" id="milk-collection"></div>
+    <section class="card rules-box">
+      <h2 class="url-title">Echter TikTok Live (lokal)</h2>
+      <pre class="code-block">npm install
+npm start
+# Optional:
+TIKTOK_USERNAME=dein_name npm start</pre>
+      <p class="url-hint">Dann: <code>localhost:3847/sortiment/</code> und Overlay mit Server-URL.</p>
     </section>
+  </div>
 
-    <section class="demo-section link-box">
-      <strong>OBS Overlay URL</strong>
-      <code id="overlay-url"></code>
-    </section>
-  </main>
-  <script type="module" src="../js/demo.js"></script>
+  <script type="module" src="js/demo-page.js?v=17"></script>
 </body>
 </html>
